@@ -2,14 +2,15 @@ from modelo_reset import ModeloReset
 
 PATH_BAIRROS = "limites_bairros_moc/limites_bairros_moc.shp"
 PATH_RESIDENCIAS = "planilhas/residencias_tratado.csv"
-PATH_OD = "planilhas/origem_destino.csv"  # Shapefile de pontos O/D
+PATH_OD = "planilhas/origem_destino.csv"
 # PATH_PONTOS_ARTICULACAO = "dados/shapefiles/pontos_articulacao.shp"
 # PATH_VIAS = "dados/shapefiles/malha_viaria.shp"
 
-EPSG_ORIGINAL = 31983
+EPSG_PROJETADO = 31983
 
 COLUNA_POPULACAO = "HAB/EDIF 2022"
 COLUNA_RENDA = "RENDA_MEDIA"
+
 
 def executar_analise_reset():
 	"""
@@ -20,7 +21,7 @@ def executar_analise_reset():
 	modelo = ModeloReset()
 
 	# Carrega os polígonos dos bairros e os pontos das residências com dados socioeconômicos.
-	modelo.carregar_dados_base(path_bairros=PATH_BAIRROS, path_residencias=PATH_RESIDENCIAS, epsg=EPSG_ORIGINAL)
+	modelo.carregar_dados_base(path_bairros=PATH_BAIRROS, path_residencias=PATH_RESIDENCIAS, epsg=EPSG_PROJETADO)
 
 	# Carrega os pontos de viagens para calcular os fluxos.
 	try:
@@ -34,6 +35,7 @@ def executar_analise_reset():
 		modelo.calcular_origem_destino()
 
 	# O resultado será um mapa com os polos classificados.
+	modelo.set_polos_planejados('Distrito Industrial')
 	modelo.selecionar_polos_desenvolvimento()  # Usa os limiares padrão (quantis)
 
 	# Carrega e plota os locais de interesse que ancorarão a rede.
@@ -54,7 +56,7 @@ def executar_analise_reset():
 	# 	print(f"\nNão foi possível estabelecer o SVETC: {e}")
 	# 	print("Certifique-se que o arquivo de vias e os nomes das colunas/avenidas estão corretos.")
 
-	print("\n>>> Análise RESET finalizada. <<<")
+	print(">>> Análise RESET finalizada. <<<")
 
 
 # Ponto de entrada do script
