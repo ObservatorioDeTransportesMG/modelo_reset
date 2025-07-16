@@ -1,0 +1,1180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Ogay</name>
+	<gx:CascadingStyle kml:id="__managed_style_1D4F974A8438D315081B">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=fbc02d&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>3.2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<gx:displayMode>card</gx:displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_000331696238D315081B">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_1D4F974A8438D315081B</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_244E70EE3838D315081B</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_0988A3368538D31AB6F6">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4.8</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_12158D602238D31AB6F4">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>3.2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_244E70EE3838D315081B">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=fbc02d&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4.8</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<gx:displayMode>card</gx:displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_03D01395A638D31AB6F4">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_12158D602238D31AB6F4</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_0988A3368538D31AB6F6</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Folder id="014D2FAA2A38D31AB6EB">
+		<name>Marcos Turísticos</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+		<Placemark id="03F2D53BD738D3150803">
+			<name>Parque Sapucaia</name>
+			<gx:mid>/g/11bc73rhl3</gx:mid>
+			<gx:fid>0xab53a98299ed33:0xe01832e4c68479b0</gx:fid>
+			<LookAt>
+				<longitude>-43.8998947</longitude>
+				<latitude>-16.7425965</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.612257196112</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8998947,-16.7425965,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="09EB5CACB338D31C2378">
+			<name>Mercado Municipal de Montes Claros</name>
+			<gx:mid>/g/1tk6w33k</gx:mid>
+			<gx:fid>0x754ab55b61a5079:0x118dab2842497e22</gx:fid>
+			<LookAt>
+				<longitude>-43.86530699999999</longitude>
+				<latitude>-16.7173189</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.76115985431</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.865307,-16.7173189,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0A52AF7CAF38D315FD18">
+			<name>Parque Municipal</name>
+			<gx:mid>/g/11c0p_k36v</gx:mid>
+			<gx:fid>0xab539fc6f586b3:0x7fd91683b5984281</gx:fid>
+			<LookAt>
+				<longitude>-43.8847824</longitude>
+				<latitude>-16.7532921</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.549188101146</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8847824,-16.7532921,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0E4919858A38D31A093C">
+			<name>Parque Guimarães Rosa</name>
+			<gx:mid>/g/11l362__m4</gx:mid>
+			<gx:fid>0xab539bef098017:0xa70f8971942b1bb</gx:fid>
+			<LookAt>
+				<longitude>-43.88313919999999</longitude>
+				<latitude>-16.7354622</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.654304911495</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8831392,-16.7354622,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="066EC16BEE38D31A5C8E">
+			<name>Parque de Exposições João Alencar de Athayde</name>
+			<gx:mid>/g/1tdp57cw</gx:mid>
+			<gx:fid>0x754ab46603101fd:0xaac93e0354a623d9</gx:fid>
+			<LookAt>
+				<longitude>-43.8510599</longitude>
+				<latitude>-16.712051</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.792164446058</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.851032,-16.7120392,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+	<Folder id="02DCEA58B638D31CD668">
+		<name>Terminais de Transporte</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+		<Placemark id="077D83FD1838D31E32AB">
+			<name>Aeroporto de Montes Claros - Mário Ribeiro</name>
+			<gx:mid>/m/04fmwgv</gx:mid>
+			<gx:fid>0x754aaef85305171:0x687a9c0a1f3748d7</gx:fid>
+			<LookAt>
+				<longitude>-43.8199862</longitude>
+				<latitude>-16.7049531</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.833924897657</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8199862,-16.7049531,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0B3EC9A5B138D31E897F">
+			<name>Rodoviária</name>
+			<gx:mid>/g/11fwx3f0ry</gx:mid>
+			<gx:fid>0xab531b4333aa11:0xcf4e829b5c51c684</gx:fid>
+			<LookAt>
+				<longitude>-43.8683539</longitude>
+				<latitude>-16.7419828</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.615874856392</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8683539,-16.7419828,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+	<Folder id="00493F34B438D31ED32F">
+		<name>Imóveis de serviços públicos</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+		<Placemark id="00261C187D38D31F6CB8">
+			<name>Hospital Aroldo Tourinho</name>
+			<gx:mid>/g/1tg6vx61</gx:mid>
+			<gx:fid>0x754ab5845cd87bb:0xe085b73e6396a55</gx:fid>
+			<LookAt>
+				<longitude>-43.8658426</longitude>
+				<latitude>-16.7099812</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.804343848683</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8658426,-16.7099812,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="00D260C6EF38D32281C8">
+			<name>Universidade Estadual de Montes Claros - Unimontes</name>
+			<gx:mid>/m/086vcm</gx:mid>
+			<gx:fid>0x754ab5bc36990c9:0xa809bd14bd946505</gx:fid>
+			<LookAt>
+				<longitude>-43.8785728</longitude>
+				<latitude>-16.7186987</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.753037405925</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8785728,-16.7186987,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="008BC3730738D321D26C">
+			<name>Hospital Dilson Godinho</name>
+			<gx:mid>/g/1td1r3j8</gx:mid>
+			<gx:fid>0xab53541be6da31:0xe46d8d154a8b94d</gx:fid>
+			<LookAt>
+				<longitude>-43.85810499999999</longitude>
+				<latitude>-16.7171003</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.762446625073</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.85810499999999,-16.7171003,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0BB33B051E38D3220918">
+			<name>Hospital Dr. Alpheu Gonçalves de Quadros</name>
+			<gx:mid>/g/11b7cb_0d1</gx:mid>
+			<gx:fid>0xab54e9f247b8ad:0xd9dd462d3ded47b0</gx:fid>
+			<LookAt>
+				<longitude>-43.8430938</longitude>
+				<latitude>-16.7460434</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.591935940463</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8430938,-16.7460434,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="04B99391F338D320933B">
+			<name>Hospital Universitário Clemente de Faria</name>
+			<gx:mid>/g/1thvj592</gx:mid>
+			<gx:fid>0xab535ea773d8f1:0x87a7235a63949faa</gx:fid>
+			<LookAt>
+				<longitude>-43.8723</longitude>
+				<latitude>-16.733784</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.664193305597</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8723,-16.733784,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="04DF3E4A4D38D32126E6">
+			<name>Santa Casa Montes Claros - Pronto Atendimento</name>
+			<gx:mid>/g/11cly97h8l</gx:mid>
+			<gx:fid>0xab5356ecd8ec9d:0xf79aa5261856e8b6</gx:fid>
+			<LookAt>
+				<longitude>-43.8703037</longitude>
+				<latitude>-16.7251</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.715346607454</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8702664,-16.7251913,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0AFB36C31F38D32332EB">
+			<name>UFMG - Campus Montes Claros</name>
+			<gx:mid>/g/11c30wc91l</gx:mid>
+			<gx:fid>0xab534d6d30eb59:0x1a831e1ec88d2b43</gx:fid>
+			<LookAt>
+				<longitude>-43.8407778</longitude>
+				<latitude>-16.6816053</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.971172210545</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8407778,-16.6816053,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0AE535AA3238D323B1C0">
+			<name>Instituto Federal do Norte de Minas Gerais - Campus Montes Claros</name>
+			<gx:mid>/g/119vkpfky</gx:mid>
+			<gx:fid>0x754aa52e8405187:0x44d36bc1df7549bc</gx:fid>
+			<LookAt>
+				<longitude>-43.82809990000001</longitude>
+				<latitude>-16.6863812</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.943112531225</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8280999,-16.6863812,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0BCA18199338D323EAC4">
+			<name>Escola Estadual Professor Plínio Ribeiro - Escola Normal</name>
+			<gx:mid>/g/1tdw03ft</gx:mid>
+			<gx:fid>0xab536961ddf1ff:0xdccad72b660ffbf9</gx:fid>
+			<LookAt>
+				<longitude>-43.8747798</longitude>
+				<latitude>-16.7303001</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.684718339121</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8747798,-16.7303001,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0326873CE138D3241EE6">
+			<name>EE Francisco Sá</name>
+			<gx:mid>/g/1vhlzf7k</gx:mid>
+			<gx:fid>0xab53563316ef33:0xa41ce5ffe688e97d</gx:fid>
+			<LookAt>
+				<longitude>-43.868325</longitude>
+				<latitude>-16.726293</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.708320713313</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8682729,-16.726301,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0AA3F7A88838D324762B">
+			<name>Escola Estadual Antônio Canela</name>
+			<gx:mid>/g/1tmqsm4_</gx:mid>
+			<gx:fid>0xab51433d1d638f:0xaad77beef7a0158</gx:fid>
+			<LookAt>
+				<longitude>-43.87631289999999</longitude>
+				<latitude>-16.7586306</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.517694030634</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.87629949999999,-16.7585231,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="05E2C3113D38D324C89C">
+			<name>Escola Estadual Professora Dulce Sarmento</name>
+			<gx:mid>/g/1w347vtz</gx:mid>
+			<gx:fid>0xab535e0048b219:0xb144299ba8ef6457</gx:fid>
+			<LookAt>
+				<longitude>-43.8721198</longitude>
+				<latitude>-16.737796</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.640551979137</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8721198,-16.737796,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="06336FD78138D3257B40">
+			<name>Colégio Tiradentes PMMG - Montes Claros</name>
+			<gx:mid>/g/1tghfc_2</gx:mid>
+			<gx:fid>0xab54c7d1e43105:0xe2edd6d7b5eff1cf</gx:fid>
+			<LookAt>
+				<longitude>-43.8466708</longitude>
+				<latitude>-16.7356121</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.653421615433</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8466713,-16.7355839,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+	<Folder id="071747D7CC38D325E23E">
+		<name>Imóveis privados de interesse público</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+		<Placemark id="08740FA48638D3277120">
+			<name>Pousada Sesc Montes Claros</name>
+			<gx:mid>/g/11btlwpklt</gx:mid>
+			<gx:fid>0xab53553997d63b:0xc0590eaaa0a2badb</gx:fid>
+			<LookAt>
+				<longitude>-43.86934400000001</longitude>
+				<latitude>-16.7214779</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.736675190124</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.869344,-16.7214779,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0A7DE76FFC38D327EDBC">
+			<name>Automóvel Clube de Montes Claros</name>
+			<gx:mid>/g/1xfspzqw</gx:mid>
+			<gx:fid>0xab54a0568121e7:0x254d0b0fd79e7034</gx:fid>
+			<LookAt>
+				<longitude>-43.864862</longitude>
+				<latitude>-16.7267977</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.705348257046</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.864862,-16.7267977,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="024AA0DEA838D3284419">
+			<name>Max Min Clube</name>
+			<gx:mid>/g/11b6_812tf</gx:mid>
+			<gx:fid>0x754aa586f819ad3:0x6cbd7fc8c179b29c</gx:fid>
+			<LookAt>
+				<longitude>-43.8177065</longitude>
+				<latitude>-16.6954221</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.889973874114</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8177065,-16.6954221,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="06C05A9F9B38D32A8C76">
+			<name>BNB Clube de Montes Claros</name>
+			<gx:mid>/g/1ptx2_4c_</gx:mid>
+			<gx:fid>0xab53567b669689:0xa61f74396e2c41f8</gx:fid>
+			<LookAt>
+				<longitude>-43.8796166</longitude>
+				<latitude>-16.7660989</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.473619321334</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8796304,-16.7660945,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="02F59A317138D32AD13C">
+			<name>AABB - Montes Claros</name>
+			<gx:mid>/g/1tdb4gyw</gx:mid>
+			<gx:fid>0x754ab1cf4727897:0xf032664ff0a163a8</gx:fid>
+			<LookAt>
+				<longitude>-43.8324912</longitude>
+				<latitude>-16.7042039</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.838331824477</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8324912,-16.7042039,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="01222E88BD38D32BD618">
+			<name>UNIFIPMoc - Centro Universitário FIPMoc</name>
+			<gx:mid>/g/1tf4g85y</gx:mid>
+			<gx:fid>0xab53474a79af37:0xe4cd141808125b8c</gx:fid>
+			<LookAt>
+				<longitude>-43.88059729999999</longitude>
+				<latitude>-16.7218617</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.734415408649</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8805973,-16.7218617,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="01271691CE38D32C264C">
+			<name>Funorte - Campus São Luiz</name>
+			<gx:mid>/g/11b6f2k54b</gx:mid>
+			<gx:fid>0xab54bf2bc7d723:0x3a55c95724e66b7e</gx:fid>
+			<LookAt>
+				<longitude>-43.8789237</longitude>
+				<latitude>-16.7253006</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.714165254138</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8789237,-16.7253006,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0C14E923EC38D32C63E4">
+			<name>Faculdade de Saúde Ibituruna</name>
+			<gx:mid>/g/1vtqxbfq</gx:mid>
+			<gx:fid>0xab53136e2da3cd:0x5e447f217340400c</gx:fid>
+			<LookAt>
+				<longitude>-43.8793287</longitude>
+				<latitude>-16.7249727</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.716096282786</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.87932869999999,-16.7249727,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0CD7077D4D38D32D2560">
+			<name>FACULDADES ISEIB - Polo FIMOC</name>
+			<gx:mid>/g/11h3wppqg0</gx:mid>
+			<gx:fid>0xab536f71b01abb:0x546a36cddd24fea7</gx:fid>
+			<LookAt>
+				<longitude>-43.86724030000001</longitude>
+				<latitude>-16.7282904</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.69655642425</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8672417,-16.7282981,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="032835612838D32DC8FB">
+			<name>SANTO AGOSTINHO PARTICIPAÇÕES</name>
+			<gx:mid>/g/11lv7zxny4</gx:mid>
+			<gx:fid>0x754ab002806b1bb:0xde8a37544c73f5a</gx:fid>
+			<LookAt>
+				<longitude>-43.84470719999999</longitude>
+				<latitude>-16.691298</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.914217026062</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8447082,-16.6912985,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="02E13ED1C138D32E1B88">
+			<name>Faculdade de Ciência e Tecnologia de Montes Claros</name>
+			<gx:mid>/g/11c5bt4jfl</gx:mid>
+			<gx:fid>0x754ab5686734e4b:0x9d0d091dab47c137</gx:fid>
+			<LookAt>
+				<longitude>-43.8535151</longitude>
+				<latitude>-16.715075</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.774367622709</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8535164,-16.7150699,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0C292643B838D32EA118">
+			<name>Universidade de Uberaba - Uniube Polo Montes Claros</name>
+			<gx:mid>/g/1ptzjy490</gx:mid>
+			<gx:fid>0x754aca9b8ba6369:0x5260fe5c7db2cd2d</gx:fid>
+			<LookAt>
+				<longitude>-43.8674154</longitude>
+				<latitude>-16.7214102</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.737073796787</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8674154,-16.7214102,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="02D961928938D3392844">
+			<name>Unopar e Anhanguera</name>
+			<gx:mid>/g/11rc9rzr_5</gx:mid>
+			<gx:fid>0xab55b15c75850f:0x89e6a215915b4da2</gx:fid>
+			<LookAt>
+				<longitude>-43.846611</longitude>
+				<latitude>-16.7322198</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.6734091307</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.846611,-16.7322198,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="008A16DEFB38D339D4CF">
+			<name>HOSPITAL Prontosocor de Montes Claros</name>
+			<gx:mid>/g/1vh_9mbj</gx:mid>
+			<gx:fid>0xab535a6d568957:0x15894e028baa0249</gx:fid>
+			<LookAt>
+				<longitude>-43.8733575</longitude>
+				<latitude>-16.7281529</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.697366314845</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8733575,-16.7281529,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0439881C0838D33196BF">
+			<name>UNIP - Polo Montes Claros/MG</name>
+			<gx:mid>/g/1w15_pjt</gx:mid>
+			<gx:fid>0xab54abe8b02dd3:0x38676132e98651ad</gx:fid>
+			<LookAt>
+				<longitude>-43.8619045</longitude>
+				<latitude>-16.7265955</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.706539134474</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8619045,-16.7265955,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+	<Folder id="0B6DDAAEEC38D33CC184">
+		<name>Imóveis privados comerciais</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+		<Placemark id="01D0101B6E38D33E8660">
+			<name>Polimix Concreto - Montes Claros</name>
+			<gx:mid>/g/11q956rc95</gx:mid>
+			<gx:fid>0x754abcfeac9ac27:0xe461025dcce2a8f7</gx:fid>
+			<LookAt>
+				<longitude>-43.8828633</longitude>
+				<latitude>-16.6780373</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.992130158627</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8828633,-16.6780373,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="07AD174F6938D33F2B20">
+			<name>Coteminas S.A</name>
+			<gx:mid>/g/11bw3d675b</gx:mid>
+			<gx:fid>0x754ab87671e7453:0xe5c3b517eec73fff</gx:fid>
+			<LookAt>
+				<longitude>-43.8650321</longitude>
+				<latitude>-16.6789474</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.986784760795</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8650321,-16.6789474,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0B894EFEB838D33FADF8">
+			<name>Novo Clube - Novo Nordisk</name>
+			<gx:mid>/g/11cs69n5g7</gx:mid>
+			<gx:fid>0x754ab628775f8c7:0xa655222722d790cf</gx:fid>
+			<LookAt>
+				<longitude>-43.8670806</longitude>
+				<latitude>-16.6945457</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.895126190729</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8670806,-16.6945457,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0F71775A0A38D341404F">
+			<name>Nestlé Waters Brasil Bebidas e Alimentos</name>
+			<gx:mid>/g/1tdn48z7</gx:mid>
+			<gx:fid>0x754ab85dc0700e1:0x4b10c0748d99a6b8</gx:fid>
+			<LookAt>
+				<longitude>-43.8640152</longitude>
+				<latitude>-16.6945168</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.895296088151</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8640152,-16.6945168,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="05CA84445338D341E1D0">
+			<name>Alpargatas</name>
+			<gx:mid>/g/11lmjwhmc4</gx:mid>
+			<gx:fid>0x754ab0067d24d9b:0x92bc8f9afafec3d3</gx:fid>
+			<LookAt>
+				<longitude>-43.8618743</longitude>
+				<latitude>-16.6740436</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1007.015583540373</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8618743,-16.6740436,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="01C425126238D342390B">
+			<name>Vallée S/A</name>
+			<gx:mid>/g/1ptzmvfr_</gx:mid>
+			<gx:fid>0xab531431aea0b9:0x8f61095a5e3ca15e</gx:fid>
+			<LookAt>
+				<longitude>-43.86090459999999</longitude>
+				<latitude>-16.6940174</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.898231918348</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8609046,-16.6940174,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="083651887538D34B0791">
+			<name>Somai Nordeste SAmontes claro MG</name>
+			<gx:mid>/g/11c6vw7cm4</gx:mid>
+			<gx:fid>0xab44d7767eedf5:0x26a6fd2a61a0b114</gx:fid>
+			<LookAt>
+				<longitude>-43.89147930000001</longitude>
+				<latitude>-16.6643246</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1007.072636911377</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8914793,-16.6643246,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="053EAA607138D34C9718">
+			<name>Montes Claros Shopping</name>
+			<gx:mid>/g/1tscq7mb</gx:mid>
+			<gx:fid>0xab53616e2cfedd:0x68ceeb2680134138</gx:fid>
+			<LookAt>
+				<longitude>-43.8702123</longitude>
+				<latitude>-16.74214449999999</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.614921673827</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8702123,-16.7421445,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0E8AA8EFB038D34CF756">
+			<name>IBI Shopping</name>
+			<gx:mid>/g/11f3ts3fpp</gx:mid>
+			<gx:fid>0xab5345fbaccd2d:0x854de311285be2b4</gx:fid>
+			<LookAt>
+				<longitude>-43.8810548</longitude>
+				<latitude>-16.725774</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.711377300989</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8810548,-16.725774,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="07A81FB81238D34ECEDF">
+			<name>Usina de Biodiesel de Montes Claros</name>
+			<gx:mid>/g/1ptz547zj</gx:mid>
+			<gx:fid>0x754ac824ad3bf89:0xeeae2a76c646b3ef</gx:fid>
+			<LookAt>
+				<longitude>-43.86912969999999</longitude>
+				<latitude>-16.6866382</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.941602370899</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.86912969999999,-16.6866382,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="035CB7AB6738D34F733E">
+			<name>Shopping Popular Mário Ribeiro da Silveira</name>
+			<gx:mid>/g/11bccm8sdt</gx:mid>
+			<gx:fid>0xab54abaf21b9c1:0x984dbc8d56eab737</gx:fid>
+			<LookAt>
+				<longitude>-43.8649837</longitude>
+				<latitude>-16.7233202</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.725827434797</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8649837,-16.7233202,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="01FD04DB7238D34FC984">
+			<name>Villefort Atacadista</name>
+			<gx:mid>/g/11h3zqy5zr</gx:mid>
+			<gx:fid>0xab53ebcdc9a22b:0xd55240c4e151e9cd</gx:fid>
+			<LookAt>
+				<longitude>-43.8706636</longitude>
+				<latitude>-16.7297242</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.68811080154</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8706636,-16.7297242,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="0EDECC407D38D3508BC4">
+			<name>Makro – Loja Montes Claros</name>
+			<gx:mid>/g/1yfjpnhs7</gx:mid>
+			<gx:fid>0x754aafbd201a5cd:0xdba3ef984ba10bde</gx:fid>
+			<LookAt>
+				<longitude>-43.8300299</longitude>
+				<latitude>-16.7007384</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.858714056204</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8300299,-16.7007384,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark id="075E2821AF38D3517E9F">
+			<name>Mart Minas - Atacado &amp; Varejo</name>
+			<gx:mid>/g/11b6ljknnk</gx:mid>
+			<gx:fid>0xab539913b2dc7b:0xbfbd8af31b15d0f7</gx:fid>
+			<LookAt>
+				<longitude>-43.8831268</longitude>
+				<latitude>-16.7589728</latitude>
+				<altitude>0</altitude>
+				<heading>0</heading>
+				<tilt>0</tilt>
+				<gx:fovy>35</gx:fovy>
+				<range>1006.515674921869</range>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+			<Point>
+				<altitudeMode>relativeToGround</altitudeMode>
+				<coordinates>-43.8831268,-16.7589728,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+	<Folder id="06038BFE5D38D353A338">
+		<name>Imóveis privados residenciais</name>
+		<styleUrl>#__managed_style_03D01395A638D31AB6F4</styleUrl>
+	</Folder>
+	<Placemark id="097225CF6338D353FC8E">
+		<name>Residencial Vitória 2</name>
+		<gx:mid>/g/11whsj764_</gx:mid>
+		<gx:fid>0x754ab0052e555e3:0xab712e6c773641dd</gx:fid>
+		<LookAt>
+			<longitude>-43.8512045</longitude>
+			<latitude>-16.6614473</latitude>
+			<altitude>0</altitude>
+			<heading>0</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>1007.089521417652</range>
+			<altitudeMode>relativeToGround</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+		<Point>
+			<altitudeMode>relativeToGround</altitudeMode>
+			<coordinates>-43.8511977,-16.6614689,0</coordinates>
+		</Point>
+	</Placemark>
+	<Placemark id="09DFE3308438D3547BD4">
+		<name>Recanto das Aguas</name>
+		<gx:mid>/g/1q6h_yzzj</gx:mid>
+		<gx:fid>0x754aa3344221bcf:0xe6dd0dabee471eac</gx:fid>
+		<LookAt>
+			<longitude>-43.82827149999999</longitude>
+			<latitude>-16.66912145</latitude>
+			<altitude>0</altitude>
+			<heading>0</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>1007.044481964212</range>
+			<altitudeMode>relativeToGround</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+		<Point>
+			<altitudeMode>relativeToGround</altitudeMode>
+			<coordinates>-43.8282566,-16.6688886,0</coordinates>
+		</Point>
+	</Placemark>
+	<Placemark id="0F8C8A6D1738D354BAEC">
+		<name>Residencial Sul Ipês</name>
+		<gx:mid>/g/1q64w48x2</gx:mid>
+		<gx:fid>0xab538a81d8aa5b:0xe00a42d609b7b784</gx:fid>
+		<LookAt>
+			<longitude>-43.86762955</longitude>
+			<latitude>-16.7744537</latitude>
+			<altitude>0</altitude>
+			<heading>0</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>2245.072129425755</range>
+			<altitudeMode>relativeToGround</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_000331696238D315081B</styleUrl>
+		<Point>
+			<altitudeMode>relativeToGround</altitudeMode>
+			<coordinates>-43.8679192,-16.7747459,0</coordinates>
+		</Point>
+	</Placemark>
+</Document>
+</kml>
