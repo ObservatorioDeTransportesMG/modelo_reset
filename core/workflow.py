@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 import geopandas as gpd
 
@@ -8,8 +8,8 @@ from . import analysis, data_loader, visualization
 
 class ModeloResetWorkflow:
 	def __init__(self, crs_projetado: str = "EPSG:31983"):
-		self.camadas: Dict[str, Any] = {}
-		self.crs_padrao: str = "EPSG:4326"  # Geográfico padrão
+		self.camadas: dict[str, Any] = {}
+		self.crs_padrao: str = "EPSG:4326"
 		self.crs_projetado: str = crs_projetado
 
 	def carregar_dados_base(self, path_bairros: str, path_residencias: str, epsg_bairros: int):
@@ -34,6 +34,7 @@ class ModeloResetWorkflow:
 		setores_com_renda = analysis.vincular_setores_com_renda(setores_filtrados, self.camadas["dados_de_renda"])
 		bairros_com_renda = analysis.agregar_renda_por_bairro(self.camadas["bairros"], setores_com_renda, self.crs_projetado)
 		self.camadas["bairros"] = bairros_com_renda
+		self.camadas["setores"] = setores_com_renda
 		print("Processamento de renda finalizado.")
 
 	def processar_densidade(self, coluna_pop="POPULACAO"):
@@ -82,6 +83,16 @@ class ModeloResetWorkflow:
 			bairros.loc[bairros["name"].isin([polo]), "tipo_polo"] = "Planejado"
 
 		# self.camadas["bairros"] = bairros
+
+	def mostrar_centroids(self):
+		"""Método responsável por plotar os bairros e os centroids dos setores censitários."""
+		setores = self.camadas["setores"].copy()
+		# setores_centroids = setores_limpos.copy()
+		setores["geometry"] = setores.geometry.centroid
+		setores_associados = gpd.sjoin(setores, self.camadas["bairros"], how="left", predicate="within")
+		setores_associados = setores_associados[setores_associados["index_right"].notnull()]
+
+		visualization.plotar_centroid_e_bairros(self.camadas["bairros"], setores_associados)
 
 	def plotar_densidade(self):
 		"""Método responsável por plotar a densidade."""

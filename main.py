@@ -45,6 +45,7 @@ def executar_analise_reset():
 	modelo.identificar_polos_desenvolvimento("Distrito Industrial")
 	# modelo.selecionar_polos_desenvolvimento()  # Usa os limiares padrão (quantis)
 
+	modelo.mostrar_centroids()
 	modelo.carregar_pontos_articulacao(PATH_PONTOS_ARTICULACAO)
 
 	modelo.mostrar_modelo_completo()

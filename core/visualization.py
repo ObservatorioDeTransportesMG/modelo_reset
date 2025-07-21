@@ -33,6 +33,24 @@ def plotar_polos(gdf_bairros: gpd.GeoDataFrame):
 	plt.show()
 
 
+def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDataFrame):
+	"""Plota o mapa de polos junto com os pontos de articulação."""
+	fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+
+	gdf_bairros.plot(ax=ax, edgecolor="white", linewidth=0.5, label="Bairros")
+
+	if not gdf_ibge.empty:
+		gdf_ibge.plot(ax=ax, marker="o", color="red", markersize=20, label="Centroids Setores Censitários")
+
+	# legend_elements = [Patch(facecolor=color, edgecolor="w", label=label) for label, color in color_map.items()]
+	ax.legend(title="Legenda", loc="lower right")
+
+	ax.set_title("Bairros e Setores Censitários", fontsize=16)
+	ax.set_axis_off()
+	plt.tight_layout()
+	plt.show()
+
+
 def plotar_modelo_completo(gdf_bairros: gpd.GeoDataFrame, gdf_pontos: gpd.GeoDataFrame):
 	"""Plota o mapa de polos junto com os pontos de articulação."""
 	fig, ax = plt.subplots(1, 1, figsize=(12, 12))

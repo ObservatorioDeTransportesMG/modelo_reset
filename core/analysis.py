@@ -29,7 +29,7 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 	setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
 
 	# Limpeza e conversão de colunas
-	colunas_para_agregar = {"V06005": "renda_total_setor", "V06002": "populacao_setor"}
+	colunas_para_agregar = {"V06004": "renda_total_setor", "V06002": "populacao_setor"}
 
 	setores_limpos = setores_proj.copy()
 	for col_original, col_novo in colunas_para_agregar.items():
