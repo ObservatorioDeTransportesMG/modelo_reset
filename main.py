@@ -33,7 +33,7 @@ def executar_analise_reset():
 	# Calcula densidade, renda e fluxos por bairro.
 	# modelo.vincular_dados_IBGE("Montes Claros", "Minas Gerais")
 	modelo.processar_renda_ibge(municipio="Montes Claros", uf="Minas Gerais")
-	modelo.processar_densidade(COLUNA_POPULACAO)
+	modelo.processar_densidade()
 	modelo.carregar_e_processar_od(path_od=PATH_OD)
 
 	# modelo.calcular_densidade_e_renda(coluna_renda=COLUNA_RENDA, coluna_pop=COLUNA_POPULACAO)

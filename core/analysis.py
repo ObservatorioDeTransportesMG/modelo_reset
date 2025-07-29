@@ -1,6 +1,8 @@
 import geopandas as gpd
 import pandas as pd
 
+from utils.constants import COLUNAS
+
 
 def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str, uf: str) -> gpd.GeoDataFrame:
 	"""Filtra um GeoDataFrame de setores censitários por município e UF."""
@@ -23,16 +25,15 @@ def vincular_setores_com_renda(
 	return setores_com_renda
 
 
-def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
-	"""Agrega dados de renda e população dos setores para os bairros."""
+def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
+	"""Função responsável por associar os dados do IBGE e dos Bairros."""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
 
 	# Limpeza e conversão de colunas
-	colunas_para_agregar = {"V06004": "renda_total_setor", "V06002": "populacao_setor"}
 
 	setores_limpos = setores_proj.copy()
-	for col_original, col_novo in colunas_para_agregar.items():
+	for col_original, col_novo in COLUNAS.items():
 		if col_original in setores_limpos.columns:
 			setores_limpos[col_original] = setores_limpos[col_original].astype(str)
 			setores_limpos[col_original] = setores_limpos[col_original].str.replace(".", "", regex=False)
@@ -45,9 +46,16 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 	setores_centroids["geometry"] = setores_centroids.geometry.centroid
 
 	join_espacial = gpd.sjoin(setores_centroids, bairros_proj, how="left", predicate="within")
+	return join_espacial[join_espacial["index_right"].notna()]
+
+
+def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
+	"""Agrega dados de renda e população dos setores para os bairros."""
+	bairros_proj = bairros_gdf.to_crs(crs_projetado)
+	join_espacial = associar_ibge_bairros(bairros_gdf, setores_com_renda_gdf, crs_projetado)
 
 	dados_agregados = join_espacial.groupby("index_right").agg(
-		renda_total_bairro=("renda_total_setor", "sum"), populacao_total_bairro=("populacao_setor", "sum")
+		renda_total_bairro=("renda_mensal_média", "sum"), populacao_total_bairro=("num_de_moradores", "sum")
 	)
 
 	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0)
@@ -57,12 +65,16 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 
 	print("Agregação de renda por bairro finalizada.")
 	print(bairros_com_renda.head())
+	if bairros_gdf.crs is None:
+		raise
 	return bairros_com_renda.to_crs(bairros_gdf.crs)
 
 
 def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFrame, destino_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 	"""Calcula o número de origens e destinos por bairro."""
 	bairros_result = bairros_gdf.copy()
+	if bairros_result.crs is None:
+		raise
 	if bairros_result.crs != origem_gdf.crs:
 		origem_gdf = origem_gdf.to_crs(bairros_result.crs)
 	if bairros_result.crs != destino_gdf.crs:
@@ -83,24 +95,23 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 	return bairros_result
 
 
-def calcular_densidade_populacional(
-	bairros_gdf: gpd.GeoDataFrame, residencias_gdf: gpd.GeoDataFrame, crs_projetado: str, coluna_pop: str = "POPULACAO"
-) -> gpd.GeoDataFrame:
+def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
 	"""Calcula a densidade populacional por bairro."""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
-	residencias_proj = residencias_gdf.to_crs(crs_projetado)
+	# residencias_proj = residencias_gdf.to_crs(crs_projetado)
+	# setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
 
 	bairros_proj["area_km2"] = bairros_proj.geometry.area / 1_000_000
 
-	join_espacial = gpd.sjoin(residencias_proj, bairros_proj, how="left", predicate="within")
+	# agregado = setores_proj.groupby("index_right").agg(populacao_total=("num_de_moradores", "sum"))
 
-	agregado = join_espacial.groupby("index_right").agg(populacao_total=(coluna_pop, "sum"), n_residencias=("geometry", "count"))
-
-	bairros_proj = bairros_proj.join(agregado).fillna(0)
-	bairros_proj["populacao_total"] = bairros_proj["populacao_total"].astype(int)
-	bairros_proj["densidade_km2"] = bairros_proj["populacao_total"] / bairros_proj["area_km2"]
+	# bairros_proj = bairros_proj.join(agregado).fillna(0)
+	bairros_proj["populacao_total_bairro"] = bairros_proj["populacao_total_bairro"].astype(int)
+	bairros_proj["densidade_km2"] = bairros_proj["populacao_total_bairro"] / bairros_proj["area_km2"]
 
 	print("Cálculo de densidade finalizado.")
+	if bairros_gdf.crs is None:
+		raise
 	return bairros_proj.to_crs(bairros_gdf.crs)
 
 

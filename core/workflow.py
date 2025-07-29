@@ -2,7 +2,6 @@ from typing import Any
 
 import geopandas as gpd
 
-# Importa as funções dos módulos que criamos
 from . import analysis, data_loader, visualization
 
 
@@ -37,12 +36,10 @@ class ModeloResetWorkflow:
 		self.camadas["setores"] = setores_com_renda
 		print("Processamento de renda finalizado.")
 
-	def processar_densidade(self, coluna_pop="POPULACAO"):
+	def processar_densidade(self):
 		"""Método responsável por processar a densidade."""
 		print("Calculando densidade populacional...")
-		self.camadas["bairros"] = analysis.calcular_densidade_populacional(
-			self.camadas["bairros"], self.camadas["residencias"], self.crs_projetado, coluna_pop
-		)
+		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
 		print("Cálculo de densidade finalizado.")
 
 	def carregar_e_processar_od(self, path_od: str):
