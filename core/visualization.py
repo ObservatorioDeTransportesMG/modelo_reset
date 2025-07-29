@@ -10,11 +10,7 @@ def plotar_mapa_coropletico(gdf: gpd.GeoDataFrame, coluna: str, titulo: str, cma
 		gdf (gpd.GeoDataFrame): O GeoDataFrame a ser plotado.
 		coluna (str): O nome da coluna cujos valores serão usados para a coloração.
 		titulo (str): O título a ser exibido no topo do mapa.
-		cmap (str, optional): O mapa de cores (colormap) a ser utilizado.
-			Padrão é "viridis".
-
-	Returns:
-		None: A função exibe o gráfico diretamente.
+		cmap (str, optional): O mapa de cores (colormap) a ser utilizado. Padrão é "viridis".
 	"""
 	fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 	gdf.plot(column=coluna, ax=ax, legend=True, cmap=cmap, edgecolor="black", linewidth=0.4)
@@ -28,11 +24,7 @@ def plotar_polos(gdf_bairros: gpd.GeoDataFrame):
 	"""Plota um mapa dos bairros coloridos de acordo com seu "Tipo de Polo".
 
 	Args:
-		gdf_bairros (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve
-			conter a coluna "tipo_polo".
-
-	Returns:
-		None: A função exibe o gráfico diretamente.
+		gdf_bairros (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter a coluna "tipo_polo".
 	"""
 	if "tipo_polo" not in gdf_bairros.columns:
 		print("Coluna 'tipo_polo' não encontrada. Execute a análise de polos primeiro.")
@@ -57,11 +49,7 @@ def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDa
 
 	Args:
 		gdf_bairros (gpd.GeoDataFrame): GeoDataFrame contendo os polígonos dos bairros.
-		gdf_ibge (gpd.GeoDataFrame): GeoDataFrame contendo a geometria dos
-			centroides dos setores censitários.
-
-	Returns:
-		None: A função exibe o gráfico diretamente.
+		gdf_ibge (gpd.GeoDataFrame): GeoDataFrame contendo a geometria dos centroides dos setores censitários.
 	"""
 	fig, ax = plt.subplots(1, 1, figsize=(12, 12))
 
@@ -84,11 +72,7 @@ def plotar_modelo_completo(gdf_bairros: gpd.GeoDataFrame, gdf_pontos: gpd.GeoDat
 
 	Args:
 		gdf_bairros (gpd.GeoDataFrame): GeoDataFrame dos bairros, com a coluna "tipo_polo".
-		gdf_pontos (gpd.GeoDataFrame): GeoDataFrame contendo os pontos de interesse
-			(ex: pontos de articulação) a serem sobrepostos no mapa.
-
-	Returns:
-		None: A função exibe o gráfico diretamente.
+		gdf_pontos (gpd.GeoDataFrame): GeoDataFrame contendo os pontos de interesse (ex: pontos de articulação) a serem sobrepostos no mapa.
 	"""
 	fig, ax = plt.subplots(1, 1, figsize=(12, 12))
 

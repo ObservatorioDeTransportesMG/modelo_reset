@@ -1,5 +1,5 @@
 # from modelo_reset import ModeloReset
-from core.workflow import ModeloResetWorkflow as ModeloReset
+from core.workflow import ModeloReset
 
 PATH_BAIRROS = "limites_bairros_moc/limites_bairros_moc.shp"
 PATH_RESIDENCIAS = "planilhas/residencias_tratado.csv"

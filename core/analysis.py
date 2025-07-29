@@ -8,14 +8,12 @@ def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str,
 	"""Filtra um GeoDataFrame de setores censitários por município e UF.
 
 	Args:
-		setores_gdf (gpd.GeoDataFrame): O GeoDataFrame de entrada contendo os
-			setores censitários. Deve conter as colunas "NM_MUN" e "NM_UF".
+		setores_gdf (gpd.GeoDataFrame): O GeoDataFrame de entrada contendo os setores censitários. Deve conter as colunas "NM_MUN" e "NM_UF".
 		municipio (str): O nome do município a ser filtrado.
 		uf (str): A sigla do estado (UF) a ser filtrado.
 
 	Returns:
-		gpd.GeoDataFrame: Um novo GeoDataFrame contendo apenas os setores
-			do município e UF especificados.
+		gpd.GeoDataFrame: Um novo GeoDataFrame contendo apenas os setores do município e UF especificados.
 	"""
 	print(f"Filtrando setores para {municipio.upper()} - {uf.upper()}...")
 	filtro = (setores_gdf["NM_MUN"].str.upper() == municipio.upper()) & (setores_gdf["NM_UF"].str.upper() == uf.upper())
@@ -30,17 +28,13 @@ def vincular_setores_com_renda(
 	"""Vincula dados de renda a um GeoDataFrame de setores censitários.
 
 	Args:
-		setores_filtrados_gdf (gpd.GeoDataFrame): GeoDataFrame com os setores
-			censitários (geralmente já filtrados por município).
+		setores_filtrados_gdf (gpd.GeoDataFrame): GeoDataFrame com os setores censitários (geralmente já filtrados por município).
 		renda_df (pd.DataFrame): DataFrame contendo os dados de renda.
-		coluna_setor_shp (str, optional): Nome da coluna com o código do setor
-			no GeoDataFrame. Padrão é "CD_SETOR".
-		coluna_setor_csv (str, optional): Nome da coluna com o código do setor
-			no DataFrame de renda. Padrão é "CD_SETOR".
+		coluna_setor_shp (str, optional): Nome da coluna com o código do setor no GeoDataFrame. Padrão é "CD_SETOR".
+		coluna_setor_csv (str, optional): Nome da coluna com o código do setor no DataFrame de renda. Padrão é "CD_SETOR".
 
 	Returns:
-		gpd.GeoDataFrame: Um GeoDataFrame com as informações de renda
-			adicionadas aos setores correspondentes.
+		gpd.GeoDataFrame: Um GeoDataFrame com as informações de renda adicionadas aos setores correspondentes.
 	"""
 	setores_filtrados_gdf[coluna_setor_shp] = setores_filtrados_gdf[coluna_setor_shp].astype(str)
 	renda_df[coluna_setor_csv] = renda_df[coluna_setor_csv].astype(str)
@@ -55,14 +49,11 @@ def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: 
 
 	Args:
 		bairros_gdf (gpd.GeoDataFrame): GeoDataFrame contendo os polígonos dos bairros.
-		setores_com_renda_gdf (gpd.GeoDataFrame): GeoDataFrame de setores censitários,
-			já enriquecido com dados de renda.
-		crs_projetado (str): O código EPSG de um Sistema de Referência de
-			Coordenadas (CRS) projetado (ex: 'EPSG:31983').
+		setores_com_renda_gdf (gpd.GeoDataFrame): GeoDataFrame de setores censitários, já enriquecido com dados de renda.
+		crs_projetado (str): O código EPSG de um Sistema de Referência de Coordenadas (CRS) projetado (ex: 'EPSG:31983').
 
 	Returns:
-		gpd.GeoDataFrame: Um GeoDataFrame onde cada linha representa um setor
-			censitário com as informações do bairro ao qual foi associado.
+		gpd.GeoDataFrame: Um GeoDataFrame onde cada linha representa um setor censitário com as informações do bairro ao qual foi associado.
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
@@ -91,13 +82,11 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 
 	Args:
 		bairros_gdf (gpd.GeoDataFrame): O GeoDataFrame original dos bairros.
-		setores_com_renda_gdf (gpd.GeoDataFrame): GeoDataFrame de setores
-			com dados de renda.
+		setores_com_renda_gdf (gpd.GeoDataFrame): GeoDataFrame de setores com dados de renda.
 		crs_projetado (str): O código EPSG do CRS projetado a ser usado.
 
 	Returns:
-		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas
-			`renda_total_bairro`, `populacao_total_bairro` e `renda_media_bairro`.
+		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `renda_total_bairro`, `populacao_total_bairro` e `renda_media_bairro`.
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	join_espacial = associar_ibge_bairros(bairros_gdf, setores_com_renda_gdf, crs_projetado)
@@ -127,8 +116,7 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 		destino_gdf (gpd.GeoDataFrame): GeoDataFrame de pontos representando os destinos.
 
 	Returns:
-		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas
-			`n_origens`, `n_destinos` e `fluxo_total`.
+		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `n_origens`, `n_destinos` e `fluxo_total`.
 	"""
 	bairros_result = bairros_gdf.copy()
 	if bairros_result.crs is None:
@@ -157,14 +145,11 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 	"""Calcula a densidade populacional por bairro (habitantes por km²).
 
 	Args:
-		bairros_gdf (gpd.GeoDataFrame): GeoDataFrame de bairros, devendo conter
-			a coluna `populacao_total_bairro`.
-		crs_projetado (str): O código EPSG do CRS projetado (ex: 'EPSG:31983')
-			para o cálculo preciso da área.
+		bairros_gdf (gpd.GeoDataFrame): GeoDataFrame de bairros, devendo conter a coluna `populacao_total_bairro`.
+		crs_projetado (str): O código EPSG do CRS projetado (ex: 'EPSG:31983') para o cálculo preciso da área.
 
 	Returns:
-		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas
-			`area_km2` e `densidade_km2`.
+		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `area_km2` e `densidade_km2`.
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	# residencias_proj = residencias_gdf.to_crs(crs_projetado)
@@ -188,15 +173,13 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.8, renda
 	"""Classifica bairros em "Polos de Desenvolvimento" com base em limiares.
 
 	Args:
-		bairros_gdf (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter
-			as colunas 'densidade_km2', 'renda_media_bairro' e 'fluxo_total'.
+		bairros_gdf (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter as colunas 'densidade_km2', 'renda_media_bairro' e 'fluxo_total'.
 		densidade_limiar (float, optional): Quantil para "alta densidade". Padrão 0.8.
 		renda_limiar (float, optional): Quantil para "baixa renda". Padrão 0.4.
 		fluxo_limiar (float, optional): Quantil para "alto fluxo". Padrão 0.8.
 
 	Returns:
-		gpd.GeoDataFrame: O GeoDataFrame de bairros com a nova coluna `tipo_polo`
-			indicando a classificação de cada um.
+		gpd.GeoDataFrame: O GeoDataFrame de bairros com a nova coluna `tipo_polo` indicando a classificação de cada um.
 	"""
 	bairros_result = bairros_gdf.copy()
 	# bairros_result["tipo_polo"] = "Nenhum"  # Inicializa

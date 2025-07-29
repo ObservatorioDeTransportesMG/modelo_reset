@@ -9,8 +9,7 @@ def ler_shapefile(path: str, target_crs: str, original_epsg: int = 4326) -> gpd.
 	Args:
 		path (str): O caminho para o arquivo shapefile.
 		target_crs (str): O CRS de destino para o qual o GeoDataFrame será convertido.
-		original_epsg (int, optional): O código EPSG a ser assumido se o
-			arquivo não tiver um CRS definido. Padrão é 4326.
+		original_epsg (int, optional): O código EPSG a ser assumido se o arquivo não tiver um CRS definido. Padrão é 4326.
 
 	Returns:
 		gpd.GeoDataFrame: Um GeoDataFrame lido a partir do arquivo e
@@ -30,13 +29,11 @@ def ler_residencias_csv(path: str, crs: str = "EPSG:4326") -> gpd.GeoDataFrame:
 	"""Lê um CSV de residências e o converte para um GeoDataFrame de pontos.
 
 	Args:
-		path (str): O caminho para o arquivo CSV. O arquivo deve conter
-			as colunas 'longitude' e 'latitude'.
+		path (str): O caminho para o arquivo CSV. O arquivo deve conter as colunas 'longitude' e 'latitude'.
 		crs (str, optional): O CRS dos pontos de geometria. Padrão é "EPSG:4326".
 
 	Returns:
-		gpd.GeoDataFrame: Um GeoDataFrame com a geometria de pontos criada
-			a partir das coordenadas do CSV.
+		gpd.GeoDataFrame: Um GeoDataFrame com a geometria de pontos criada a partir das coordenadas do CSV.
 	"""
 	df = pd.read_csv(path)
 	geometria = gpd.points_from_xy(df["longitude"], df["latitude"])
@@ -75,13 +72,10 @@ def ler_kml(path: str, target_crs: str) -> gpd.GeoDataFrame:
 
 	Args:
 		path (str): O caminho para o arquivo KML.
-		target_crs (str): O CRS de destino para o qual o GeoDataFrame final
-			será convertido.
+		target_crs (str): O CRS de destino para o qual o GeoDataFrame final será convertido.
 
 	Returns:
-		gpd.GeoDataFrame: Um único GeoDataFrame contendo os dados de todas as
-			camadas do KML, convertido para o CRS de destino. Retorna um
-			GeoDataFrame vazio em caso de erro.
+		gpd.GeoDataFrame: Um único GeoDataFrame contendo os dados de todas as camadas do KML, convertido para o CRS de destino. Retorna um GeoDataFrame vazio em caso de erro.
 	"""
 	gdfs: list[gpd.GeoDataFrame] = []
 	try:

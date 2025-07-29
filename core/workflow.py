@@ -5,21 +5,16 @@ import geopandas as gpd
 from . import analysis, data_loader, visualization
 
 
-class ModeloResetWorkflow:
+class ModeloReset:
 	"""
-	Orquestra o fluxo de trabalho completo para análise geoespacial, desde o
-	carregamento de dados até a visualização de resultados.
+	Orquestra o fluxo de trabalho completo para análise geoespacial, desde o carregamento de dados até a visualização de resultados.
 	"""
 
 	def __init__(self, crs_projetado: str = "EPSG:31983"):
 		"""Inicializa o workflow, definindo os sistemas de coordenadas e o contêiner de camadas.
 
 		Args:
-			crs_projetado (str, optional): O CRS projetado a ser usado para
-				cálculos de área e distância. Padrão é "EPSG:31983".
-
-		Returns:
-			None
+			crs_projetado (str, optional): O CRS projetado a ser usado para cálculos de área e distância. Padrão é "EPSG:31983".
 		"""
 		self.camadas: dict[str, Any] = {}
 		self.crs_padrao: str = "EPSG:4326"
@@ -31,11 +26,7 @@ class ModeloResetWorkflow:
 		Args:
 			path_bairros (str): Caminho para o shapefile dos bairros.
 			path_residencias (str): Caminho para o CSV das residências.
-			epsg_bairros (int): Código EPSG original do shapefile de bairros,
-				caso não esteja definido no arquivo.
-
-		Returns:
-			None
+			epsg_bairros (int): Código EPSG original do shapefile de bairros, caso não esteja definido no arquivo.
 		"""
 		print("Carregando dados de base...")
 		self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
@@ -48,9 +39,6 @@ class ModeloResetWorkflow:
 		Args:
 			path_setores (str): Caminho para o shapefile dos setores censitários.
 			path_renda (str): Caminho para o CSV com os dados de renda.
-
-		Returns:
-			None
 		"""
 		print("Carregando dados do IBGE...")
 		self.camadas["setores_censitarios"] = data_loader.ler_shapefile(path_setores, self.crs_padrao)
@@ -63,9 +51,6 @@ class ModeloResetWorkflow:
 		Args:
 			municipio (str): Nome do município para filtrar os setores censitários.
 			uf (str): Sigla do estado (UF) para filtrar os setores.
-
-		Returns:
-			None
 		"""
 		print("Processando e vinculando dados de renda...")
 		setores_filtrados = analysis.filtrar_setores_por_municipio(self.camadas["setores_censitarios"], municipio, uf)
@@ -76,14 +61,7 @@ class ModeloResetWorkflow:
 		print("Processamento de renda finalizado.")
 
 	def processar_densidade(self):
-		"""Calcula a densidade populacional para a camada de bairros.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Calcula a densidade populacional para a camada de bairros."""
 		print("Calculando densidade populacional...")
 		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
 		print("Cálculo de densidade finalizado.")
@@ -93,9 +71,6 @@ class ModeloResetWorkflow:
 
 		Args:
 			path_od (str): Caminho para o arquivo CSV de Origem-Destino.
-
-		Returns:
-			None
 		"""
 		print("Carregando e processando dados de O/D...")
 		df_od = data_loader.ler_od_csv(path_od)
@@ -113,11 +88,7 @@ class ModeloResetWorkflow:
 		"""Define polos planejados e identifica polos emergentes e consolidados.
 
 		Args:
-			*polos_planejados (str): Nomes dos bairros a serem classificados
-				como "Planejado".
-
-		Returns:
-			None
+			*polos_planejados (str): Nomes dos bairros a serem classificados como "Planejado".
 		"""
 		print("Identificando polos...")
 		self.set_polos_planejados(*polos_planejados)
@@ -128,9 +99,6 @@ class ModeloResetWorkflow:
 
 		Args:
 			path_pontos (str): Caminho para o arquivo KML dos pontos de articulação.
-
-		Returns:
-			None
 		"""
 		print("Carregando pontos de articulação...")
 		self.camadas["pontos_articulacao"] = data_loader.ler_kml(path_pontos, self.crs_padrao)
@@ -140,11 +108,7 @@ class ModeloResetWorkflow:
 		"""Define manualmente quais bairros são classificados como "Planejado".
 
 		Args:
-			*args (str): Uma sequência de nomes de bairros a serem definidos
-				como "Planejado".
-
-		Returns:
-			None
+			*args (str): Uma sequência de nomes de bairros a serem definidos como "Planejado".
 		"""
 		bairros = self.camadas.get("bairros", gpd.GeoDataFrame())
 		if bairros.empty:
@@ -155,14 +119,7 @@ class ModeloResetWorkflow:
 			bairros.loc[bairros["name"].isin([polo]), "tipo_polo"] = "Planejado"
 
 	def mostrar_centroids(self):
-		"""Plota os bairros e os centroides dos setores censitários associados.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Plota os bairros e os centroides dos setores censitários associados."""
 		setores = self.camadas["setores"].copy()
 		setores["geometry"] = setores.geometry.centroid
 		setores_associados = gpd.sjoin(setores, self.camadas["bairros"], how="left", predicate="within")
@@ -171,45 +128,17 @@ class ModeloResetWorkflow:
 		visualization.plotar_centroid_e_bairros(self.camadas["bairros"], setores_associados)
 
 	def plotar_densidade(self):
-		"""Gera e exibe um mapa coroplético da densidade populacional dos bairros.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Gera e exibe um mapa coroplético da densidade populacional dos bairros."""
 		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "densidade_km2", "Densidade Populacional (hab/km²)", "OrRd")
 
 	def plotar_renda_media(self):
-		"""Gera e exibe um mapa coroplético da renda média dos bairros.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Gera e exibe um mapa coroplético da renda média dos bairros."""
 		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "renda_media_bairro", "Renda Média por Bairro", "YlGn")
 
 	def mostrar_polos(self):
-		"""Gera e exibe um mapa dos polos de desenvolvimento.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Gera e exibe um mapa dos polos de desenvolvimento."""
 		visualization.plotar_polos(self.camadas["bairros"])
 
 	def mostrar_modelo_completo(self):
-		"""Gera e exibe o mapa final com polos e pontos de articulação.
-
-		Args:
-			None
-
-		Returns:
-			None
-		"""
+		"""Gera e exibe o mapa final com polos e pontos de articulação."""
 		visualization.plotar_modelo_completo(self.camadas["bairros"], self.camadas.get("pontos_articulacao", gpd.GeoDataFrame()))
