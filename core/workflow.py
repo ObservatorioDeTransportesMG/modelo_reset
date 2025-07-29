@@ -6,28 +6,67 @@ from . import analysis, data_loader, visualization
 
 
 class ModeloResetWorkflow:
+	"""
+	Orquestra o fluxo de trabalho completo para análise geoespacial, desde o
+	carregamento de dados até a visualização de resultados.
+	"""
+
 	def __init__(self, crs_projetado: str = "EPSG:31983"):
+		"""Inicializa o workflow, definindo os sistemas de coordenadas e o contêiner de camadas.
+
+		Args:
+			crs_projetado (str, optional): O CRS projetado a ser usado para
+				cálculos de área e distância. Padrão é "EPSG:31983".
+
+		Returns:
+			None
+		"""
 		self.camadas: dict[str, Any] = {}
 		self.crs_padrao: str = "EPSG:4326"
 		self.crs_projetado: str = crs_projetado
 
 	def carregar_dados_base(self, path_bairros: str, path_residencias: str, epsg_bairros: int):
-		"""Método responsável por carregar os dados de shapefile e residências."""
+		"""Carrega as camadas de dados geográficos base (bairros e residências).
+
+		Args:
+			path_bairros (str): Caminho para o shapefile dos bairros.
+			path_residencias (str): Caminho para o CSV das residências.
+			epsg_bairros (int): Código EPSG original do shapefile de bairros,
+				caso não esteja definido no arquivo.
+
+		Returns:
+			None
+		"""
 		print("Carregando dados de base...")
 		self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
 		self.camadas["residencias"] = data_loader.ler_residencias_csv(path_residencias, self.crs_padrao)
 		print("Dados de base carregados.")
 
 	def carregar_dados_ibge(self, path_setores: str, path_renda: str):
-		"""Método responsável por carregar os dados do IBGE."""
+		"""Carrega os dados do IBGE (setores censitários e dados de renda).
+
+		Args:
+			path_setores (str): Caminho para o shapefile dos setores censitários.
+			path_renda (str): Caminho para o CSV com os dados de renda.
+
+		Returns:
+			None
+		"""
 		print("Carregando dados do IBGE...")
-		# Shapefile já é lido com o CRS padrão
 		self.camadas["setores_censitarios"] = data_loader.ler_shapefile(path_setores, self.crs_padrao)
 		self.camadas["dados_de_renda"] = data_loader.ler_renda_csv(path_renda)
 		print("Dados do IBGE carregados.")
 
 	def processar_renda_ibge(self, municipio: str, uf: str):
-		"""Método responsável por processar os dados de renda do IBGE."""
+		"""Filtra, vincula e agrega dados de renda e população por bairro.
+
+		Args:
+			municipio (str): Nome do município para filtrar os setores censitários.
+			uf (str): Sigla do estado (UF) para filtrar os setores.
+
+		Returns:
+			None
+		"""
 		print("Processando e vinculando dados de renda...")
 		setores_filtrados = analysis.filtrar_setores_por_municipio(self.camadas["setores_censitarios"], municipio, uf)
 		setores_com_renda = analysis.vincular_setores_com_renda(setores_filtrados, self.camadas["dados_de_renda"])
@@ -37,17 +76,30 @@ class ModeloResetWorkflow:
 		print("Processamento de renda finalizado.")
 
 	def processar_densidade(self):
-		"""Método responsável por processar a densidade."""
+		"""Calcula a densidade populacional para a camada de bairros.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		print("Calculando densidade populacional...")
 		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
 		print("Cálculo de densidade finalizado.")
 
 	def carregar_e_processar_od(self, path_od: str):
-		"""Método responsável por carregar e processar dados de origem-destino."""
+		"""Carrega dados de Origem-Destino e calcula os fluxos por bairro.
+
+		Args:
+			path_od (str): Caminho para o arquivo CSV de Origem-Destino.
+
+		Returns:
+			None
+		"""
 		print("Carregando e processando dados de O/D...")
 		df_od = data_loader.ler_od_csv(path_od)
 
-		# Cria GeoDataFrames para origem e destino
 		geom_origem = gpd.points_from_xy(df_od["longitude_origem"], df_od["latitude_origem"])
 		origem_gdf = gpd.GeoDataFrame(df_od, geometry=geom_origem, crs=self.crs_padrao)
 
@@ -57,20 +109,43 @@ class ModeloResetWorkflow:
 		self.camadas["bairros"] = analysis.calcular_fluxos_od(self.camadas["bairros"], origem_gdf, destino_gdf)
 		print("Processamento de O/D finalizado.")
 
-	def identificar_polos_desenvolvimento(self, *polos_planejados):
-		"""Método responsável por identificar os polos de desenvolvimento."""
+	def identificar_polos_desenvolvimento(self, *polos_planejados: str):
+		"""Define polos planejados e identifica polos emergentes e consolidados.
+
+		Args:
+			*polos_planejados (str): Nomes dos bairros a serem classificados
+				como "Planejado".
+
+		Returns:
+			None
+		"""
 		print("Identificando polos...")
 		self.set_polos_planejados(*polos_planejados)
 		self.camadas["bairros"] = analysis.identificar_polos(self.camadas["bairros"])
 
 	def carregar_pontos_articulacao(self, path_pontos: str):
-		"""Métodos responsável por carregar os pontos de articulação."""
+		"""Carrega a camada de pontos de articulação a partir de um arquivo KML.
+
+		Args:
+			path_pontos (str): Caminho para o arquivo KML dos pontos de articulação.
+
+		Returns:
+			None
+		"""
 		print("Carregando pontos de articulação...")
 		self.camadas["pontos_articulacao"] = data_loader.ler_kml(path_pontos, self.crs_padrao)
 		print(f"Carregados {len(self.camadas['pontos_articulacao'])} pontos.")
 
 	def set_polos_planejados(self, *args: str):
-		"""Função responsável por setar os polos planejados."""
+		"""Define manualmente quais bairros são classificados como "Planejado".
+
+		Args:
+			*args (str): Uma sequência de nomes de bairros a serem definidos
+				como "Planejado".
+
+		Returns:
+			None
+		"""
 		bairros = self.camadas.get("bairros", gpd.GeoDataFrame())
 		if bairros.empty:
 			return
@@ -79,12 +154,16 @@ class ModeloResetWorkflow:
 		for polo in args:
 			bairros.loc[bairros["name"].isin([polo]), "tipo_polo"] = "Planejado"
 
-		# self.camadas["bairros"] = bairros
-
 	def mostrar_centroids(self):
-		"""Método responsável por plotar os bairros e os centroids dos setores censitários."""
+		"""Plota os bairros e os centroides dos setores censitários associados.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		setores = self.camadas["setores"].copy()
-		# setores_centroids = setores_limpos.copy()
 		setores["geometry"] = setores.geometry.centroid
 		setores_associados = gpd.sjoin(setores, self.camadas["bairros"], how="left", predicate="within")
 		setores_associados = setores_associados[setores_associados["index_right"].notnull()]
@@ -92,17 +171,45 @@ class ModeloResetWorkflow:
 		visualization.plotar_centroid_e_bairros(self.camadas["bairros"], setores_associados)
 
 	def plotar_densidade(self):
-		"""Método responsável por plotar a densidade."""
+		"""Gera e exibe um mapa coroplético da densidade populacional dos bairros.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "densidade_km2", "Densidade Populacional (hab/km²)", "OrRd")
 
 	def plotar_renda_media(self):
-		"""Método responsável por plotar a renda média."""
+		"""Gera e exibe um mapa coroplético da renda média dos bairros.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "renda_media_bairro", "Renda Média por Bairro", "YlGn")
 
 	def mostrar_polos(self):
-		"""Método responsável por mostrar os polos."""
+		"""Gera e exibe um mapa dos polos de desenvolvimento.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		visualization.plotar_polos(self.camadas["bairros"])
 
 	def mostrar_modelo_completo(self):
-		"""Método responsável por mostrar o modelo completo."""
+		"""Gera e exibe o mapa final com polos e pontos de articulação.
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		visualization.plotar_modelo_completo(self.camadas["bairros"], self.camadas.get("pontos_articulacao", gpd.GeoDataFrame()))
