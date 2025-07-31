@@ -1,5 +1,6 @@
 import geopandas as gpd
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 
@@ -53,13 +54,17 @@ def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDa
 	"""
 	fig, ax = plt.subplots(1, 1, figsize=(12, 12))
 
-	gdf_bairros.plot(ax=ax, edgecolor="white", linewidth=0.5, label="Bairros")
+	gdf_bairros.plot(ax=ax, facecolor="lightgray", edgecolor="white", linewidth=0.5)
 
 	if not gdf_ibge.empty:
-		gdf_ibge.plot(ax=ax, marker="o", color="red", markersize=20, label="Centroids Setores Censitários")
+		gdf_ibge.plot(ax=ax, marker="o", color="red", markersize=20)
 
-	# legend_elements = [Patch(facecolor=color, edgecolor="w", label=label) for label, color in color_map.items()]
-	ax.legend(title="Legenda", loc="lower right")
+	legend_elements = [
+		Patch(facecolor="lightgray", edgecolor="black", label="Bairros"),
+		Line2D([0], [0], marker="o", color="w", label="Centroids Setores Censitários", markerfacecolor="red", markersize=10),
+	]
+
+	ax.legend(handles=legend_elements, title="Legenda", loc="lower right")
 
 	ax.set_title("Bairros e Setores Censitários", fontsize=16)
 	ax.set_axis_off()

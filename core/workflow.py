@@ -10,7 +10,7 @@ class ModeloReset:
 	Orquestra o fluxo de trabalho completo para análise geoespacial, desde o carregamento de dados até a visualização de resultados.
 	"""
 
-	def __init__(self, crs_projetado: str = "EPSG:31983"):
+	def __init__(self, crs_projetado: int = 31983):
 		"""Inicializa o workflow, definindo os sistemas de coordenadas e o contêiner de camadas.
 
 		Args:
@@ -20,7 +20,7 @@ class ModeloReset:
 		self.crs_padrao: str = "EPSG:4326"
 		self.crs_projetado: str = crs_projetado
 
-	def carregar_dados_base(self, path_bairros: str, path_residencias: str, epsg_bairros: int):
+	def carregar_dados_base(self, path_bairros: str, epsg_bairros: int):
 		"""Carrega as camadas de dados geográficos base (bairros e residências).
 
 		Args:
@@ -30,7 +30,7 @@ class ModeloReset:
 		"""
 		print("Carregando dados de base...")
 		self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
-		self.camadas["residencias"] = data_loader.ler_residencias_csv(path_residencias, self.crs_padrao)
+		# self.camadas["residencias"] = data_loader.ler_residencias_csv(path_residencias, self.crs_padrao)
 		print("Dados de base carregados.")
 
 	def carregar_dados_ibge(self, path_setores: str, path_renda: str):
@@ -121,7 +121,16 @@ class ModeloReset:
 	def mostrar_centroids(self):
 		"""Plota os bairros e os centroides dos setores censitários associados."""
 		setores = self.camadas["setores"].copy()
-		setores["geometry"] = setores.geometry.centroid
+		# 1. Armazene o CRS original para poder voltar a ele mais tarde.
+		crs_original = setores.crs
+
+		# crs_projetado_epsg = self.crs_projetado
+
+		setores_projetado = setores.to_crs(epsg=self.crs_projetado)
+
+		centroides_projetados = setores_projetado.geometry.centroid
+
+		setores["geometry"] = centroides_projetados.to_crs(crs_original)
 		setores_associados = gpd.sjoin(setores, self.camadas["bairros"], how="left", predicate="within")
 		setores_associados = setores_associados[setores_associados["index_right"].notnull()]
 
