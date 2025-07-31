@@ -18,7 +18,7 @@ class ModeloReset:
 		"""
 		self.camadas: dict[str, Any] = {}
 		self.crs_padrao: str = "EPSG:4326"
-		self.crs_projetado: str = crs_projetado
+		self.crs_projetado: int = crs_projetado
 
 	def carregar_dados_base(self, path_bairros: str, epsg_bairros: int):
 		"""Carrega as camadas de dados geográficos base (bairros e residências).
@@ -64,7 +64,6 @@ class ModeloReset:
 		"""Calcula a densidade populacional para a camada de bairros."""
 		print("Calculando densidade populacional...")
 		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
-		print("Cálculo de densidade finalizado.")
 
 	def carregar_e_processar_od(self, path_od: str):
 		"""Carrega dados de Origem-Destino e calcula os fluxos por bairro.

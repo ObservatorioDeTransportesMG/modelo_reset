@@ -44,7 +44,7 @@ def vincular_setores_com_renda(
 	return setores_com_renda
 
 
-def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
+def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
 	"""Associa dados de setores censitários (IBGE) aos polígonos de bairros.
 
 	Args:
@@ -77,7 +77,7 @@ def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: 
 	return join_espacial[join_espacial["index_right"].notna()]
 
 
-def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
+def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
 	"""Agrega dados de renda e população dos setores para a camada de bairros.
 
 	Args:
@@ -101,7 +101,6 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 	)
 
 	print("Agregação de renda por bairro finalizada.")
-	print(bairros_com_renda.head())
 	if bairros_gdf.crs is None:
 		raise
 	return bairros_com_renda.to_crs(bairros_gdf.crs)
@@ -141,7 +140,7 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 	return bairros_result
 
 
-def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
+def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
 	"""Calcula a densidade populacional por bairro (habitantes por km²).
 
 	Args:
