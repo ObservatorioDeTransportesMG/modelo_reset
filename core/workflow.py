@@ -141,7 +141,7 @@ class ModeloReset:
 
 	def plotar_renda_media(self):
 		"""Gera e exibe um mapa coroplético da renda média dos bairros."""
-		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "renda_media_bairro", "Renda Média por Bairro", "YlGn")
+		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "renda_total_bairro", "Renda Média por Bairro", "YlGn")
 
 	def mostrar_polos(self):
 		"""Gera e exibe um mapa dos polos de desenvolvimento."""
