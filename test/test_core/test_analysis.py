@@ -135,7 +135,7 @@ def test_agregar_renda_por_bairro(mocker, mock_bairros_gdf, mock_setores_gdf):
 
 	# Modificar a geometria do Bairro A para conter os dois centroides de SP
 	bairros_modificado = mock_bairros_gdf.copy()
-	bairros_modificado.geometry.iloc[0] = Polygon([(-1, -1), (3, -1), (3, 3), (-1, 3)])
+	bairros_modificado.loc[0, "geometry"] = Polygon([(-1, -1), (3, -1), (3, 3), (-1, 3)])
 
 	resultado = agregar_renda_por_bairro(bairros_modificado, setores_sp, CRS_PROJETADO)
 
