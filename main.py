@@ -48,6 +48,9 @@ def executar_analise_reset():
 	modelo.mostrar_centroids()
 	modelo.carregar_pontos_articulacao(PATH_PONTOS_ARTICULACAO)
 
+	modelo.plotar_renda_media()
+	modelo.plotar_densidade()
+
 	modelo.mostrar_modelo_completo()
 
 	print(">>> Análise RESET finalizada. <<<")

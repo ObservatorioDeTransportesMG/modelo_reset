@@ -86,19 +86,19 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 		crs_projetado (str): O código EPSG do CRS projetado a ser usado.
 
 	Returns:
-		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `renda_total_bairro`, `populacao_total_bairro` e `renda_media_bairro`.
+		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `renda_total_bairro`, `populacao_total_bairro` e `renda_total_bairro`.
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	join_espacial = associar_ibge_bairros(bairros_gdf, setores_com_renda_gdf, crs_projetado)
 
 	dados_agregados = join_espacial.groupby("index_right").agg(
-		renda_total_bairro=("renda_mensal_média", "sum"), populacao_total_bairro=("num_de_moradores", "sum")
+		renda_total_bairro=("renda_mensal_media", "sum"), populacao_total_bairro=("num_de_moradores", "sum")
 	)
 
 	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0)
-	bairros_com_renda["renda_media_bairro"] = bairros_com_renda.apply(
-		lambda row: row["renda_total_bairro"] / row["populacao_total_bairro"] if row["populacao_total_bairro"] > 0 else 0, axis=1
-	)
+	# bairros_com_renda["renda_total_bairro"] = bairros_com_renda.apply(
+	# 	lambda row: row["renda_total_bairro"] / row["populacao_total_bairro"] if row["populacao_total_bairro"] > 0 else 0, axis=1
+	# )
 
 	print("Agregação de renda por bairro finalizada.")
 	if bairros_gdf.crs is None:
@@ -168,11 +168,11 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 	return bairros_proj.to_crs(bairros_gdf.crs)
 
 
-def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.8, renda_limiar=0.4, fluxo_limiar=0.8) -> gpd.GeoDataFrame:
+def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.6, renda_limiar=0.6, fluxo_limiar=0.6) -> gpd.GeoDataFrame:
 	"""Classifica bairros em "Polos de Desenvolvimento" com base em limiares.
 
 	Args:
-		bairros_gdf (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter as colunas 'densidade_km2', 'renda_media_bairro' e 'fluxo_total'.
+		bairros_gdf (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter as colunas 'densidade_km2', 'renda_total_bairro' e 'fluxo_total'.
 		densidade_limiar (float, optional): Quantil para "alta densidade". Padrão 0.8.
 		renda_limiar (float, optional): Quantil para "baixa renda". Padrão 0.4.
 		fluxo_limiar (float, optional): Quantil para "alto fluxo". Padrão 0.8.
@@ -183,23 +183,19 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.8, renda
 	bairros_result = bairros_gdf.copy()
 	# bairros_result["tipo_polo"] = "Nenhum"  # Inicializa
 
-	dens_alta = bairros_result["densidade_km2"].quantile(densidade_limiar)
-	renda_baixa = bairros_result["renda_media_bairro"].quantile(renda_limiar)
-	fluxo_alto = bairros_result["fluxo_total"].quantile(fluxo_limiar)
+	densidade = bairros_result["densidade_km2"].quantile(densidade_limiar)
+	renda = bairros_result["renda_total_bairro"].quantile(renda_limiar)
+	fluxo = bairros_result["fluxo_total"].quantile(fluxo_limiar)
 
 	# Polo Consolidado
 	bairros_result.loc[
-		(bairros_result["densidade_km2"] >= dens_alta)
-		& (bairros_result["renda_media_bairro"] <= renda_baixa)
-		& (bairros_result["fluxo_total"] >= fluxo_alto),
+		(bairros_result["densidade_km2"] >= densidade) & (bairros_result["renda_total_bairro"] <= renda) & (bairros_result["fluxo_total"] >= fluxo),
 		"tipo_polo",
 	] = "Consolidado"
 
 	# Polo Emergente
 	bairros_result.loc[
-		(bairros_result["densidade_km2"] >= dens_alta)
-		& (bairros_result["renda_media_bairro"] <= renda_baixa)
-		& (bairros_result["fluxo_total"] < fluxo_alto),
+		(bairros_result["densidade_km2"] >= densidade) & (bairros_result["renda_total_bairro"] <= renda) & (bairros_result["fluxo_total"] <= fluxo),
 		"tipo_polo",
 	] = "Emergente"
 
