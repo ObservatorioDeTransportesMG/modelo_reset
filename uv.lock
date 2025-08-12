@@ -202,12 +202,25 @@ wheels = [
 ]
 
 [[package]]
+name = "matplotlib-scalebar"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c5/3d/e76e0e48c96e43b656446c35990824f20136de21940a7436020ab757a54d/matplotlib_scalebar-0.9.0.tar.gz", hash = "sha256:f91adc5e4e67ac920a8fa98a55f904d56e5c2da4d56286748c31ec62146362be", size = 1180588, upload-time = "2025-01-17T22:10:59.349Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/c0/2dfab7b319dabe23f5a7b515a797c74b501d15c72e7a03837cf0cf779b9e/matplotlib_scalebar-0.9.0-py3-none-any.whl", hash = "sha256:5140525cd4e0c60bcade541b86571dabaf446fa69192530bd82d60b54601aa79", size = 16411, upload-time = "2025-01-17T22:10:57.319Z" },
+]
+
+[[package]]
 name = "modelo-reset"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "geopandas" },
     { name = "matplotlib" },
+    { name = "matplotlib-scalebar" },
     { name = "pandas" },
     { name = "pyogrio" },
     { name = "requests" },
@@ -223,6 +236,7 @@ dev = [
 requires-dist = [
     { name = "geopandas", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.10.3" },
+    { name = "matplotlib-scalebar", specifier = ">=0.9.0" },
     { name = "pandas", specifier = ">=2.3.1" },
     { name = "pyogrio", specifier = ">=0.11.0" },
     { name = "requests", specifier = ">=2.32.4" },
