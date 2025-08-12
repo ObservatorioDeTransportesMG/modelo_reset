@@ -8,3 +8,6 @@ COLUNAS = {
 
 CRS_GEO = 4326
 CRS_PROJETADO = 31983
+
+SHAPEFILE_NAME = "_setores_CD2022.shp"
+CSV_NAME = "Agregados_por_setores_renda_responsavel_BR.csv"
