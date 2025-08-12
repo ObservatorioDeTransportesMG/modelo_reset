@@ -138,20 +138,22 @@ class ModeloReset:
 		setores_associados = gpd.sjoin(setores, self.camadas["bairros"], how="left", predicate="within")
 		setores_associados = setores_associados[setores_associados["index_right"].notnull()]
 
-		visualization.plotar_centroid_e_bairros(self.camadas["bairros"], setores_associados)
+		visualization.plotar_centroid_e_bairros(self.camadas["bairros"], setores_associados, self.crs_projetado)
 
 	def plotar_densidade(self):
 		"""Gera e exibe um mapa coroplético da densidade populacional dos bairros."""
-		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "densidade_km2", "Densidade Populacional (hab/km²)", "OrRd")
+		visualization.plotar_mapa_coropletico(
+			self.camadas["bairros"], self.crs_projetado, "densidade_km2", "Densidade Populacional (hab/km²)", "OrRd"
+		)
 
 	def plotar_renda_media(self):
 		"""Gera e exibe um mapa coroplético da renda média dos bairros."""
-		visualization.plotar_mapa_coropletico(self.camadas["bairros"], "renda_total_bairro", "Renda Média por Bairro", "YlGn")
+		visualization.plotar_mapa_coropletico(self.camadas["bairros"], self.crs_projetado, "renda_total_bairro", "Renda Média por Bairro", "YlGn")
 
 	def mostrar_polos(self):
 		"""Gera e exibe um mapa dos polos de desenvolvimento."""
-		visualization.plotar_polos(self.camadas["bairros"])
+		visualization.plotar_polos(self.camadas["bairros"], self.crs_projetado)
 
 	def mostrar_modelo_completo(self):
 		"""Gera e exibe o mapa final com polos e pontos de articulação."""
-		visualization.plotar_modelo_completo(self.camadas["bairros"], self.camadas.get("pontos_articulacao", gpd.GeoDataFrame()))
+		visualization.plotar_modelo_completo(self.camadas["bairros"], self.camadas.get("pontos_articulacao", gpd.GeoDataFrame()), self.crs_projetado)
