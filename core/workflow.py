@@ -1,8 +1,10 @@
+import os
 from typing import Any
 
 import geopandas as gpd
 
 from . import analysis, data_loader, visualization
+from .ibge_downloader import baixar_dados_censo_renda, baixar_malha_municipal
 
 
 class ModeloReset:
@@ -30,22 +32,28 @@ class ModeloReset:
 		"""
 		print("Carregando dados de base...")
 		self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
-		# self.camadas["residencias"] = data_loader.ler_residencias_csv(path_residencias, self.crs_padrao)
 		print("Dados de base carregados.")
 
-	def carregar_dados_ibge(self, path_setores: str, path_renda: str):
+	def carregar_dados_ibge(self, ano_censo: int, uf: str = "MG"):
 		"""Carrega os dados do IBGE (setores censitários e dados de renda).
 
 		Args:
-			path_setores (str): Caminho para o shapefile dos setores censitários.
-			path_renda (str): Caminho para o CSV com os dados de renda.
+			ano_malha (int): O ano da malha territorial do IBGE (ex: 2024).
+			ano_censo (int): O ano do censo do IBGE (ex: 2022).
+			uf (str): A sigla do estado em maiúsculas (ex: "SP", "MG").
 		"""
 		print("Carregando dados do IBGE...")
+		path_setores = baixar_malha_municipal(diretorio_saida=os.path.join("data", "malha"), uf=uf, ano=ano_censo)
+		path_renda = baixar_dados_censo_renda(diretorio_saida="data", ano=ano_censo)
+
+		if path_setores is None or path_renda is None:
+			raise Exception("Erro ao baixar dados do IBGE.")
+
 		self.camadas["setores_censitarios"] = data_loader.ler_shapefile(path_setores, self.crs_padrao)
-		self.camadas["dados_de_renda"] = data_loader.ler_renda_csv(path_renda)
+		self.camadas["dados_de_renda"] = data_loader.ler_renda_csv(path_renda, separador=";")
 		print("Dados do IBGE carregados.")
 
-	def processar_renda_ibge(self, municipio: str, uf: str):
+	def processar_renda_ibge(self, municipio: str):
 		"""Filtra, vincula e agrega dados de renda e população por bairro.
 
 		Args:
@@ -53,7 +61,7 @@ class ModeloReset:
 			uf (str): Sigla do estado (UF) para filtrar os setores.
 		"""
 		print("Processando e vinculando dados de renda...")
-		setores_filtrados = analysis.filtrar_setores_por_municipio(self.camadas["setores_censitarios"], municipio, uf)
+		setores_filtrados = analysis.filtrar_setores_por_municipio(self.camadas["setores_censitarios"], municipio)
 		setores_com_renda = analysis.vincular_setores_com_renda(setores_filtrados, self.camadas["dados_de_renda"])
 		bairros_com_renda = analysis.agregar_renda_por_bairro(self.camadas["bairros"], setores_com_renda, self.crs_projetado)
 		self.camadas["bairros"] = bairros_com_renda
@@ -120,10 +128,7 @@ class ModeloReset:
 	def mostrar_centroids(self):
 		"""Plota os bairros e os centroides dos setores censitários associados."""
 		setores = self.camadas["setores"].copy()
-		# 1. Armazene o CRS original para poder voltar a ele mais tarde.
 		crs_original = setores.crs
-
-		# crs_projetado_epsg = self.crs_projetado
 
 		setores_projetado = setores.to_crs(epsg=self.crs_projetado)
 
