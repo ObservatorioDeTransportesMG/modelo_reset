@@ -12,8 +12,8 @@ EPSG_PROJETADO = 31983
 COLUNA_POPULACAO = "HAB/EDIF 2022"
 COLUNA_RENDA = "RENDA_MEDIA"
 
-DADOS_RENDA = "arquivos/planilhas/Agregados_por_setores_renda_responsavel_BR.csv"
-SETORES_CENSITARIOS = "BR_setores_CD2022/BR_setores_CD2022.shp"
+# DADOS_RENDA = "arquivos/planilhas/Agregados_por_setores_renda_responsavel_BR.csv"
+# SETORES_CENSITARIOS = "BR_setores_CD2022/BR_setores_CD2022.shp"
 
 
 def executar_analise_reset():
@@ -26,13 +26,13 @@ def executar_analise_reset():
 
 	# Carrega os polígonos dos bairros e os pontos das residências com dados socioeconômicos.
 	modelo.carregar_dados_base(path_bairros=PATH_BAIRROS, epsg_bairros=EPSG_PROJETADO)
-	modelo.carregar_dados_ibge(path_setores=SETORES_CENSITARIOS, path_renda=DADOS_RENDA)
+	modelo.carregar_dados_ibge(2022)
 
 	# Carrega os pontos de viagens para calcular os fluxos.
 
 	# Calcula densidade, renda e fluxos por bairro.
 	# modelo.vincular_dados_IBGE("Montes Claros", "Minas Gerais")
-	modelo.processar_renda_ibge(municipio="Montes Claros", uf="Minas Gerais")
+	modelo.processar_renda_ibge(municipio="Montes Claros")
 	modelo.processar_densidade()
 	modelo.carregar_e_processar_od(path_od=PATH_OD)
 

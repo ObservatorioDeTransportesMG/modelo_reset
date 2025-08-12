@@ -21,6 +21,10 @@ def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str]
 		if uf:
 			diretorio_saida = os.path.join(diretorio_saida, uf)
 
+		if os.path.exists(diretorio_saida):
+			print(f"Diretório {diretorio_saida} já existente.")
+			return diretorio_saida
+
 		Path(diretorio_saida).mkdir(parents=True, exist_ok=True)
 
 		nome_arquivo_zip = os.path.join(diretorio_saida, Path(url).name)
@@ -55,7 +59,7 @@ def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str]
 		return None
 
 
-def baixar_malha_municipal(diretorio_saida: str, uf: str = "MG", ano: int = 2024) -> Optional[str]:
+def baixar_malha_municipal(diretorio_saida: str, uf: str = "MG", ano: int = 2022) -> Optional[str]:
 	"""Baixa a malha municipal (shapefile) de um estado (UF) e ano específicos do IBGE.
 
 	Args:
@@ -66,9 +70,7 @@ def baixar_malha_municipal(diretorio_saida: str, uf: str = "MG", ano: int = 2024
 	Returns:
 		Optional[str]: O caminho para o arquivo .shp principal se o download e a descompactação forem bem-sucedidos, caso contrário None.
 	"""
-	# Exemplo de URL base para malhas municipais.
-	# ATENÇÃO: Esta URL pode mudar. Verifique no site do IBGE se o link ainda é válido.
-	url = f"https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_{ano}/UFs/{uf}/{uf}_Municipios_{ano}.zip"
+	url = f"https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2022/setores/shp/UF/{uf}_setores_CD2022.zip"
 
 	diretorio_extraido = _baixar_e_descompactar_zip(url, diretorio_saida, uf)
 
@@ -108,5 +110,5 @@ def baixar_dados_censo_renda(diretorio_saida: str, ano: int = 2022) -> Optional[
 
 
 if __name__ == "__main__":
-	baixar_dados_censo_renda("arquivos/teste/")
-	baixar_malha_municipal("arquivos/malha_teste/")
+	baixar_dados_censo_renda("data/")
+	baixar_malha_municipal("data/malha/")

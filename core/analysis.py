@@ -4,7 +4,7 @@ import pandas as pd
 from utils.constants import COLUNAS
 
 
-def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str, uf: str) -> gpd.GeoDataFrame:
+def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str) -> gpd.GeoDataFrame:
 	"""Filtra um GeoDataFrame de setores censitários por município e UF.
 
 	Args:
@@ -15,8 +15,8 @@ def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str,
 	Returns:
 		gpd.GeoDataFrame: Um novo GeoDataFrame contendo apenas os setores do município e UF especificados.
 	"""
-	print(f"Filtrando setores para {municipio.upper()} - {uf.upper()}...")
-	filtro = (setores_gdf["NM_MUN"].str.upper() == municipio.upper()) & (setores_gdf["NM_UF"].str.upper() == uf.upper())
+	print(f"Filtrando setores para {municipio.upper()}...")
+	filtro = setores_gdf["NM_MUN"].str.upper() == municipio.upper()
 	setores_filtrados = setores_gdf[filtro].copy()
 	print(f"Encontrados {len(setores_filtrados)} setores.")
 	return setores_filtrados
@@ -96,9 +96,6 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 	)
 
 	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0)
-	# bairros_com_renda["renda_total_bairro"] = bairros_com_renda.apply(
-	# 	lambda row: row["renda_total_bairro"] / row["populacao_total_bairro"] if row["populacao_total_bairro"] > 0 else 0, axis=1
-	# )
 
 	print("Agregação de renda por bairro finalizada.")
 	if bairros_gdf.crs is None:
@@ -151,14 +148,9 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 		gpd.GeoDataFrame: O GeoDataFrame de bairros com as novas colunas `area_km2` e `densidade_km2`.
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
-	# residencias_proj = residencias_gdf.to_crs(crs_projetado)
-	# setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
 
 	bairros_proj["area_km2"] = bairros_proj.geometry.area / 1_000_000
 
-	# agregado = setores_proj.groupby("index_right").agg(populacao_total=("num_de_moradores", "sum"))
-
-	# bairros_proj = bairros_proj.join(agregado).fillna(0)
 	bairros_proj["populacao_total_bairro"] = bairros_proj["populacao_total_bairro"].astype(int)
 	bairros_proj["densidade_km2"] = bairros_proj["populacao_total_bairro"] / bairros_proj["area_km2"]
 
@@ -181,7 +173,6 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.6, renda
 		gpd.GeoDataFrame: O GeoDataFrame de bairros com a nova coluna `tipo_polo` indicando a classificação de cada um.
 	"""
 	bairros_result = bairros_gdf.copy()
-	# bairros_result["tipo_polo"] = "Nenhum"  # Inicializa
 
 	densidade = bairros_result["densidade_km2"].quantile(densidade_limiar)
 	renda = bairros_result["renda_total_bairro"].quantile(renda_limiar)
