@@ -5,6 +5,8 @@ from typing import Optional
 
 import requests
 
+from utils import constants
+
 
 def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str] = None) -> Optional[str]:
 	"""Função auxiliar para baixar e descompactar um arquivo .zip.
@@ -21,13 +23,15 @@ def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str]
 		if uf:
 			diretorio_saida = os.path.join(diretorio_saida, uf)
 
-		if os.path.exists(diretorio_saida):
-			print(f"Diretório {diretorio_saida} já existente.")
-			return diretorio_saida
+			if os.path.exists(os.path.join(diretorio_saida, uf + constants.SHAPEFILE_NAME)):
+				return diretorio_saida
 
 		Path(diretorio_saida).mkdir(parents=True, exist_ok=True)
 
 		nome_arquivo_zip = os.path.join(diretorio_saida, Path(url).name)
+
+		if os.path.exists(os.path.join(diretorio_saida, constants.CSV_NAME)):
+			return diretorio_saida
 
 		print(f"Baixando de: {url}")
 
