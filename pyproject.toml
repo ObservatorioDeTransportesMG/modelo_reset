@@ -2,23 +2,19 @@
 name = "modelo-reset"
 version = "0.1.0"
 description = "Modelo Reset - Criação da estrutura das linhas de ônibus baseando-se em possíveis polos e micro polos"
+readme = "README.md"
+requires-python = ">=3.13"
 authors = [
     {name = "yagomaia",email = "yagohenriquev123@gmail.com"}
 ]
-license = {text = "MIT"}
-readme = "README.md"
-requires-python = ">=3.13"
 dependencies = [
     "geopandas>=1.1.1",
     "matplotlib>=3.10.3",
+    "matplotlib-scalebar>=0.9.0",
     "pandas>=2.3.1",
     "pyogrio>=0.11.0",
+    "requests>=2.32.4",
 ]
-
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 150
@@ -68,8 +64,13 @@ line-ending = "auto"
 docstring-code-format = true
 docstring-code-line-length = 60
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-mock>=3.14.1",
+]
+
 [tool.ruff.lint.isort]
-known-first-party = ["escritorio"]
 combine-as-imports = true
 
 [tool.ruff.lint.per-file-ignores]
