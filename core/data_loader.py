@@ -12,15 +12,13 @@ def ler_shapefile(path: str, target_crs: str, original_epsg: int = 4326) -> gpd.
 		original_epsg (int, optional): O código EPSG a ser assumido se o arquivo não tiver um CRS definido. Padrão é 4326.
 
 	Returns:
-		gpd.GeoDataFrame: Um GeoDataFrame lido a partir do arquivo e
-			convertido para o CRS de destino.
+		gpd.GeoDataFrame: Um GeoDataFrame lido a partir do arquivo e convertido para o CRS de destino.
 	"""
 	shapefile = gpd.read_file(path, ignore_geometry=False)
 	if shapefile.crs is None:
 		print(f"Aviso: CRS não definido para {path}. Assumindo EPSG:{original_epsg}.")
 		shapefile = shapefile.set_crs(epsg=original_epsg, inplace=True)
 
-	# Converte para o CRS padrão geográfico para consistência
 	shapefile = shapefile.to_crs(target_crs)
 	return shapefile
 
@@ -79,7 +77,6 @@ def ler_kml(path: str, target_crs: str) -> gpd.GeoDataFrame:
 	"""
 	gdfs: list[gpd.GeoDataFrame] = []
 	try:
-		# Habilita o driver KML que pode não estar ativado por padrão
 		layers = list_layers(path)
 		for layer_info in layers:
 			layer_name = layer_info[0]
@@ -90,7 +87,6 @@ def ler_kml(path: str, target_crs: str) -> gpd.GeoDataFrame:
 		if not gdfs:
 			raise ValueError("Nenhuma camada encontrada no arquivo KML.")
 
-		# Concatena todos os GeoDataFrames
 		concatenated_gdf = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True), crs="EPSG:4326")
 		return concatenated_gdf.to_crs(target_crs)
 

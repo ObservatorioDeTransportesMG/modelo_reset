@@ -58,8 +58,6 @@ def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: 
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 	setores_proj = setores_com_renda_gdf.to_crs(crs_projetado)
 
-	# Limpeza e conversão de colunas
-
 	setores_limpos = setores_proj.copy()
 	for col_original, col_novo in COLUNAS.items():
 		if col_original in setores_limpos.columns:
@@ -122,7 +120,6 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 	if bairros_result.crs != destino_gdf.crs:
 		destino_gdf = destino_gdf.to_crs(bairros_result.crs)
 
-	# Assumindo que o índice do bairro é usado para agrupar
 	pontos_origem = gpd.sjoin(origem_gdf, bairros_result, how="left", predicate="within")
 	pontos_destino = gpd.sjoin(destino_gdf, bairros_result, how="left", predicate="within")
 

@@ -10,6 +10,7 @@ authors = [
 dependencies = [
     "geopandas>=1.1.1",
     "matplotlib>=3.10.3",
+    "matplotlib-map-utils>=3.1.0",
     "matplotlib-scalebar>=0.9.0",
     "pandas>=2.3.1",
     "pyogrio>=0.11.0",

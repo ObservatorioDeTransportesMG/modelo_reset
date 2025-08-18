@@ -53,7 +53,7 @@ class ModeloReset:
 		self.camadas["dados_de_renda"] = data_loader.ler_renda_csv(path_renda, separador=";")
 		print("Dados do IBGE carregados.")
 
-	def processar_renda_ibge(self, municipio: str):
+	def _processar_renda_ibge(self, municipio: str):
 		"""Filtra, vincula e agrega dados de renda e população por bairro.
 
 		Args:
@@ -68,10 +68,15 @@ class ModeloReset:
 		self.camadas["setores"] = setores_com_renda
 		print("Processamento de renda finalizado.")
 
-	def processar_densidade(self):
+	def _processar_densidade(self):
 		"""Calcula a densidade populacional para a camada de bairros."""
 		print("Calculando densidade populacional...")
 		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
+
+	def processar_dados(self, municipio: str):
+		"""Função responsável por processar todos os dados necessários."""
+		self._processar_renda_ibge(municipio)
+		self._processar_densidade()
 
 	def carregar_e_processar_od(self, path_od: str):
 		"""Carrega dados de Origem-Destino e calcula os fluxos por bairro.
