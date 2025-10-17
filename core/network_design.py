@@ -1,149 +1,151 @@
+from typing import Literal
+
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import networkx as nx
-from shapely import LineString, MultiPoint, Point
+from shapely.geometry import LineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
-# 1. Carregar os Shapefiles
-try:
-	# Carregando o shapefile de vias
-	gdf_vias = gpd.read_file("arquivos/Shapes para Mapas/Sistema viario.shp")
-	gdf_bairros = gpd.read_file("arquivos/limites_bairros_moc/limites_bairros_moc.shp")
-
-	# Carregando o shapefile de pontos
-	# gdf_pontos = gpd.read_file("arquivos/pontos_teste.shp")
-	gdf_pontos = gpd.read_file("arquivos/Shapes para Mapas/Node.shp")
-
-except Exception as e:
-	print(f"Erro ao ler os arquivos shapefile: {e}")
-	exit()
-
-# gdf_vias = gdf_vias[gdf_vias["TYPE"] == "residential"]
-
-gdf_bairros = gdf_bairros.to_crs(gdf_vias.crs)
-
-gdf_vias_2 = gpd.sjoin(gdf_vias, gdf_bairros, how="inner", predicate="intersects")
-gdf_vias = gdf_vias_2.drop_duplicates(subset="ID")
-
-fig, ax = plt.subplots(figsize=(12, 12))
-
-# Plotar a rede de vias
-# gdf_bairros.plot(ax=ax, color="gray")
-# gdf_vias.plot(ax=ax, color="red", linewidth=0.5, zorder=1)
-
-# plt.show()
-
-print("COLUNAS VIAS: ", gdf_vias.columns)
-print("COLUNAS PONTOS: ", gdf_pontos.columns)
-
-# exit()
-
-# Certificar-se de que ambos os GeoDataFrames estão no mesmo sistema de coordenadas (CRS)
-if gdf_vias.crs != gdf_pontos.crs:
-	print("Aviso: Os sistemas de coordenadas são diferentes. Reprojetando os pontos.")
-	gdf_pontos = gdf_pontos.to_crs(gdf_vias.crs)
-
-# 2. Construir a Rede (Grafo)
-# Criar um grafo MultiDiGraph para permitir múltiplas arestas entre os mesmos nós e arestas direcionadas
+# Define o CRS projetado para a região de Montes Claros (cálculos em metros)
+PROJECTED_CRS = "EPSG:31983"
 
 
-G = nx.MultiDiGraph()
+def criar_grafo(gdf_vias: gpd.GeoDataFrame) -> nx.MultiDiGraph:
+	"""
+	Cria o grafo a partir de um GeoDataFrame de vias JÁ PROJETADO.
+	"""
+	G = nx.MultiDiGraph()
 
-gdf_vias = gdf_vias[(gdf_vias["DIR"] == -1) | (gdf_vias["DIR"] == 0)]
+	# itertuples() é significativamente mais rápido que iterrows()
+	for via in gdf_vias.itertuples():
+		# Ignora geometrias inválidas
+		if not via.geometry.is_valid or via.geometry.is_empty:
+			continue
 
-for _, via in gdf_vias.iterrows():
-	# Coordenadas de início e fim da geometria da via
-	ponto_inicio = via.geometry.coords[0]
-	ponto_fim = via.geometry.coords[-1]
+		ponto_inicio = via.geometry.coords[0]
+		ponto_fim = via.geometry.coords[-1]
 
-	# Atributos da aresta (peso, ID da via, etc.)
-	atributos = {
-		"weight": via.geometry.length,  # Custo principal para Dijkstra (comprimento)
-		"via_id": via["ID"],  # Guardar o ID original da via é uma boa prática
-	}
+		# O peso agora está em metros, o que é correto para o Dijkstra
+		atributos = {"weight": via.geometry.length, "via_id": via.ID}
+		direcao = via.DIR
 
-	direcao = via["DIR"]
+		if direcao == 0:
+			G.add_edge(ponto_inicio, ponto_fim, **atributos)
+			G.add_edge(ponto_fim, ponto_inicio, **atributos)
+		elif direcao == 1:
+			G.add_edge(ponto_inicio, ponto_fim, **atributos)
+		elif direcao == -1:
+			G.add_edge(ponto_fim, ponto_inicio, **atributos)
 
-	# Lógica para adicionar arestas com base na coluna 'DIR'
-	if direcao == 0:
-		# Mão dupla: adicionar arestas em ambos os sentidos
-		G.add_edge(ponto_inicio, ponto_fim, **atributos)
-		G.add_edge(ponto_fim, ponto_inicio, **atributos)
-	elif direcao == 1:
-		# Mão única no sentido da digitalização (From-To)
-		G.add_edge(ponto_inicio, ponto_fim, **atributos)
-	elif direcao == -1:
-		# Mão única no sentido oposto à digitalização (To-From)
-		G.add_edge(ponto_fim, ponto_inicio, **atributos)
-	# else:
-	# Opcional: tratar vias sem direção definida (por exemplo, assumir mão dupla)
-	# G.add_edge(ponto_inicio, ponto_fim, **atributos)
-	# G.add_edge(ponto_fim, ponto_inicio, **atributos)
-
-print(f"Grafo direcionado criado com {G.number_of_nodes()} nós e {G.number_of_edges()} arestas.")
+	print(f"Grafo direcionado criado com {G.number_of_nodes()} nós e {G.number_of_edges()} arestas.")
+	return G
 
 
-# 3. Integrar os Pontos à Rede
-# plt.show()
-# Encontrar os nós da rede mais próximos aos seus pontos de interesse
-
-
-# Função para encontrar o nó mais próximo no grafo para um dado ponto
-def encontrar_no_mais_proximo(ponto, grafo):
-	nos = list(grafo.nodes())
-	pontos_nos = [Point(no) for no in nos]
-	ponto_mais_proximo = nearest_points(ponto, MultiPoint(pontos_nos))[1]
+def encontrar_no_mais_proximo(ponto: Point, nos_grafo_multipoint: MultiPoint):
+	"""
+	Encontra o Nó mais próximo de forma otimizada, recebendo um MultiPoint pré-calculado.
+	"""
+	ponto_mais_proximo = nearest_points(ponto, nos_grafo_multipoint)[1]
 	return (ponto_mais_proximo.x, ponto_mais_proximo.y)
 
 
-# Supondo que você queira encontrar o caminho entre o primeiro e o segundo ponto do seu shapefile
-ponto_origem = gdf_pontos.geometry.iloc[0]
-ponto_destino = gdf_pontos.geometry.iloc[-1]
+def encontrar_caminho_minimo(
+	gdf_bairros: gpd.GeoDataFrame, grafo: nx.MultiDiGraph, bairro_central: str = "Centro", sentido: Literal["IDA", "VOLTA"] = "IDA"
+) -> gpd.GeoDataFrame:
+	"""
+	Encontra o caminho mínimo entre os centroides dos bairros e um bairro central.
 
-# Encontrar os nós do grafo mais próximos dos pontos de origem e destino
-no_origem = encontrar_no_mais_proximo(ponto_origem, G)
-no_destino = encontrar_no_mais_proximo(ponto_destino, G)
+	Assume que TODOS os dados de entrada estão em um CRS projetado.
+	"""
+	if grafo.number_of_nodes() == 0:
+		print("Aviso: O grafo está vazio. Nenhum caminho pode ser calculado.")
+		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
 
-print(f"Nó de origem na rede: {no_origem}")
-print(f"Nó de destino na rede: {no_destino}")
+	# Otimização: pré-calcula os nós do grafo para a busca
+	nos_multipoint = MultiPoint([Point(no) for no in grafo.nodes()])
 
-# 4. Executar o Algoritmo de Dijkstra
-try:
-	# Calcular o caminho mais curto usando o algoritmo de Dijkstra
-	# O atributo 'weight' é usado para o cálculo (neste caso, o comprimento da via)
-	caminho_mais_curto = nx.dijkstra_path(G, source=no_origem, target=no_destino, weight="weight")
-	print("Caminho mais curto encontrado:")
-	# print(caminho_mais_curto) # Descomente para ver a lista de coordenadas do caminho
+	# CORREÇÃO: Extrai o objeto Point do GeoSeries usando .item()
+	geometria_bairro_central = gdf_bairros[gdf_bairros["name"] == bairro_central].geometry.centroid.item()
+	ponto_central = Point(geometria_bairro_central)
+	no_central = encontrar_no_mais_proximo(Point(ponto_central), nos_multipoint)
 
-	# Calcular o comprimento do caminho
-	comprimento_caminho = nx.dijkstra_path_length(G, source=no_origem, target=no_destino, weight="weight")
-	print(f"Comprimento do caminho: {comprimento_caminho:.2f} unidades")
+	lista_caminhos = []
+	for bairro in gdf_bairros.itertuples():
+		# Pula o cálculo do caminho do bairro central para ele mesmo
+		if bairro.name == bairro_central:
+			continue
 
-except nx.NetworkXNoPath:
-	print("Não foi possível encontrar um caminho entre a origem e o destino.")
-	caminho_mais_curto = None
+		ponto_bairro = bairro.geometry.centroid
+		no_bairro = encontrar_no_mais_proximo(ponto_bairro, nos_multipoint)
 
-# 5. Visualizar o Resultado
-# fig, ax = plt.subplots(figsize=(12, 12))
+		source, target = (no_bairro, no_central) if sentido == "IDA" else (no_central, no_bairro)
 
-# Plotar a rede de vias
-gdf_vias.plot(ax=ax, color="gray", linewidth=0.5, zorder=1)
+		try:
+			caminho_mais_curto = nx.dijkstra_path(grafo, source=source, target=target, weight="weight")
+			# CORREÇÃO: Adiciona o caminho à lista APENAS se ele for encontrado
+			lista_caminhos.append({"geometry": LineString(caminho_mais_curto), "bairro_origem": bairro.name})
+			print(f"Caminho encontrado para o bairro no sentido de {sentido}: {bairro.name}")
+		except nx.NetworkXNoPath:
+			print(f"Não foi possível encontrar um caminho para o bairro no sentido de {sentido}: {bairro.name}.")
 
-# Plotar os pontos originais
-gdf_pontos.plot(ax=ax, color="red", markersize=2, zorder=2)
+	if not lista_caminhos:
+		print("Aviso: Nenhum caminho foi gerado no total.")
+		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
 
-# Se um caminho foi encontrado, plotá-lo
-if caminho_mais_curto:
-	# Criar um GeoDataFrame para o caminho
-	caminho_linha = LineString(caminho_mais_curto)
-	gdf_caminho = gpd.GeoDataFrame([{"geometry": caminho_linha}], crs=gdf_vias.crs)
+	return gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
 
-	# Plotar o caminho
-	gdf_caminho.plot(ax=ax, color="blue", linewidth=2, zorder=3)
 
-# Plotar os nós de origem e destino na rede
-ax.scatter(*zip(no_origem, no_destino), color="green", s=100, zorder=4, label="Nós na Rede")
+def plotar_caminhos(
+	gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame, gdf_caminho_ida: gpd.GeoDataFrame, gdf_caminho_volta: gpd.GeoDataFrame
+):
+	fig, ax = plt.subplots(figsize=(12, 12))
 
-ax.set_title("Análise de Rota com Algoritmo de Dijkstra")
-ax.legend()
-plt.show()
+	gdf_vias.plot(ax=ax, color="gray", linewidth=0.5, zorder=1, label="Sistema Viário")
+	gdf_bairros.plot(ax=ax, facecolor="none", edgecolor="red", zorder=2, label="Limites dos Bairros")
+	gdf_bairros.centroid.plot(ax=ax, color="black", marker="*", markersize=100, zorder=4, label="Centroides")
+
+	gdf_caminho_ida.plot(ax=ax, color="blue", linewidth=2.5, zorder=3, label="Linhas Propostas (IDA)")
+	gdf_caminho_volta.plot(ax=ax, color="green", linewidth=2.5, zorder=3, label="Linhas Propostas (VOLTA)")
+
+	ax.set_title("Análise de Rota com Algoritmo de Dijkstra")
+	ax.set_xlabel("Coordenada Leste (metros)")
+	ax.set_ylabel("Coordenada Norte (metros)")
+	ax.legend()
+	plt.grid(True)
+	plt.show()
+
+
+if __name__ == "__main__":
+	try:
+		gdf_vias_orig = gpd.read_file("arquivos/Shapes para Mapas/Sistema viario.shp")
+		gdf_bairros_orig = gpd.read_file("arquivos/limites_bairros_moc/limites_bairros_moc.shp")
+	except Exception as e:
+		print(f"Erro ao ler os arquivos shapefile: {e}")
+		exit()
+
+	# --- ETAPA 1: Projeção de CRS (Passo mais importante) ---
+	print(f"Projetando dados para o CRS métrico: {PROJECTED_CRS}")
+	gdf_vias_proj = gdf_vias_orig.to_crs(PROJECTED_CRS)
+	gdf_bairros_proj = gdf_bairros_orig.to_crs(PROJECTED_CRS)
+	gdf_bairros_proj = gdf_bairros_proj[(gdf_bairros_proj["name"] == "Morrinhos") | (gdf_bairros_proj["name"] == "Centro")]
+
+	# --- ETAPA 2: Filtragem de Dados ---
+	# Filtra as vias para conter apenas as que cruzam os bairros de interesse.
+	# Isso torna o grafo menor e mais relevante para a análise.
+	vias_filtradas = gpd.sjoin(gdf_vias_proj, gdf_bairros_proj, how="inner", predicate="intersects")
+	# Remove duplicatas de vias que podem cruzar a fronteira de múltiplos bairros
+	vias_filtradas = vias_filtradas.drop_duplicates(subset="ID")
+
+	# --- ETAPA 3: Análise de Rede ---
+	print("\nIniciando a criação do grafo...")
+	grafo = criar_grafo(vias_filtradas)
+
+	print("\nCalculando os caminhos mínimos...")
+	caminhos_volta = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="VOLTA")
+	caminhos_ida = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="IDA")
+
+	# --- ETAPA 4: Visualização ---
+	if not caminhos_volta.empty and not caminhos_ida.empty:
+		plotar_caminhos(vias_filtradas, gdf_bairros_proj, caminhos_ida, caminhos_volta)
+	else:
+		print("\nAnálise concluída, mas nenhum caminho foi encontrado para plotar.")
