@@ -3,13 +3,22 @@ from typing import Literal
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import networkx as nx
-from shapely.geometry import LineString, MultiLineString, MultiPoint, Point, Polygon
+from shapely.geometry import LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon
 from shapely.ops import nearest_points
 
 from core.data_loader import ler_kml
 
 PROJECTED_CRS = "EPSG:31983"
 GEOGRAPHIC_CRS = "EPSG:4326"
+
+
+def filtrar_vias_por_bairros(gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+	"""
+	Filtra o GeoDataFrame de vias para incluir apenas aquelas que intersectam a área dos bairros.
+	"""
+	vias_filtradas = gpd.sjoin(gdf_vias, gdf_bairros, how="inner", predicate="intersects")
+	vias_filtradas = vias_filtradas.drop_duplicates(subset="ID")
+	return vias_filtradas
 
 
 def calcular_peso_atrativo(ponto_articulacao: Point, ponto_aresta: Point, peso_original: float):
@@ -132,7 +141,7 @@ def encontrar_caminho_minimo(
 		if bairro.name == bairro_central:
 			continue
 
-		if not isinstance(bairro.geometry, Polygon):
+		if not isinstance(bairro.geometry, (Polygon, MultiPolygon)):
 			continue
 
 		ponto_bairro = bairro.geometry.centroid
