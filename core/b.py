@@ -7,6 +7,8 @@ import polars as pl
 from shapely.geometry import LineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
+from core.data_loader import ler_kml
+
 # --- Definições Globais e de CRS ---
 PROJECTED_CRS = "EPSG:31983"  # SIRGAS 2000 / UTM Zone 23S para Montes Claros
 GEOGRAPHIC_CRS = "EPSG:4326"  # WGS 84 (padrão para lat/lon)
@@ -142,17 +144,15 @@ if __name__ == "__main__":
 	try:
 		df_viario_pl = pl.read_csv("arquivos/grafo/SistemaViario.csv", encoding="ISO-8859-1")
 		df_nodes_pl = pl.read_csv("arquivos/grafo/Node.csv")
+		df_pontos_articulacao = ler_kml("arquivos/pontos_articulacao.kml", GEOGRAPHIC_CRS)
 		gdf_bairros_orig = gpd.read_file("arquivos/limites_bairros_moc/limites_bairros_moc.shp")
 	except Exception as e:
 		print(f"Erro ao ler os arquivos: {e}")
 		exit()
 
-	# 2. Converter Dados Tabulares para GeoDataFrames e Definir CRS
-	# Criando GeoDataFrame dos nós, assumindo que as coordenadas são lat/lon (WGS 84)
 	gdf_pontos = gpd.GeoDataFrame(geometry=gpd.points_from_xy(df_nodes_pl["Longitude"] / 1e6, df_nodes_pl["Latitude"] / 1e6), crs=GEOGRAPHIC_CRS)
 	gdf_pontos["node_id"] = df_nodes_pl["ID"]
 
-	# Criando GeoDataFrame das vias (arestas)
 	df_viario_pd = df_viario_pl.to_pandas()
 	df_nodes_pd = df_nodes_pl.to_pandas()
 
@@ -160,9 +160,6 @@ if __name__ == "__main__":
 	nodes_to = df_nodes_pd.add_suffix("_to")
 
 	df_merged = df_viario_pd.merge(nodes_from, left_on="From ID", right_on="ID_from").merge(nodes_to, left_on="To ID", right_on="ID_to")
-
-	# df_merged_from = df_viario_pd.merge(df_nodes_pl.to_pandas(), left_on="From ID", right_on="ID", suffixes=("", "_from"))
-	# df_merged_full = df_merged_from.merge(df_nodes_pl.to_pandas(), left_on="To ID", right_on="ID", suffixes=("_from", "_to"))
 
 	gdf_vias = gpd.GeoDataFrame(
 		df_merged,
@@ -175,15 +172,14 @@ if __name__ == "__main__":
 		crs=GEOGRAPHIC_CRS,
 	)
 
-	# 3. PROJETAR TODOS OS DADOS PARA O MESMO CRS MÉTRICO
 	print(f"Projetando todos os dados para {PROJECTED_CRS}...")
 	gdf_bairros_proj = gdf_bairros_orig.to_crs(PROJECTED_CRS)
 	gdf_vias_proj = gdf_vias.to_crs(PROJECTED_CRS)
 
 	# 4. Filtrar Bairros e Vias para a Análise
-	# gdf_bairros_analise = gdf_bairros_proj[gdf_bairros_proj["name"].isin(["Morrinhos", "Centro"])]
+	gdf_bairros_proj = gdf_bairros_proj[gdf_bairros_proj["name"].isin(["Morrinhos", "Centro"])]
 	# Opcional: filtrar vias que estão na área de análise para otimizar o grafo
-	# vias_na_area = gpd.sjoin(gdf_vias_proj, gdf_bairros_analise, how="inner", predicate="intersects")
+	vias_na_area = gpd.sjoin(gdf_vias_proj, gdf_bairros_proj, how="inner", predicate="intersects")
 	# vias_na_area = vias_na_area.drop_duplicates(subset=["ID_from"])  # Remove duplicatas por ID
 
 	# fig, ax = plt.subplots(figsize=(12, 12))
@@ -201,8 +197,8 @@ if __name__ == "__main__":
 	# plt.show()
 
 	# 5. Executar a Análise de Caminhos
-	gdf_caminhos_ida = encontrar_caminhos(gdf_vias_proj, gdf_bairros_proj, bairro_central="Centro", sentido="IDA")
-	gdf_caminhos_volta = encontrar_caminhos(gdf_vias_proj, gdf_bairros_proj, bairro_central="Centro", sentido="VOLTA")
+	gdf_caminhos_ida = encontrar_caminhos(vias_na_area, gdf_bairros_proj, sentido="IDA")
+	gdf_caminhos_volta = encontrar_caminhos(vias_na_area, gdf_bairros_proj, sentido="VOLTA")
 
 	# 6. Plotar o Resultado
-	plotar_rede(gdf_vias_proj, gdf_bairros_proj, gdf_caminhos_ida, gdf_caminhos_volta)
+	plotar_rede(vias_na_area, gdf_bairros_proj, gdf_caminhos_ida, gdf_caminhos_volta)
