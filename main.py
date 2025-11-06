@@ -18,15 +18,17 @@ def executar_analise_reset():
 	modelo = ModeloReset(crs_projetado=EPSG_PROJETADO)
 
 	print("\n--- Carregando Camadas ---")
-	modelo.carregar_dados_base(path_bairros=PATH_BAIRROS, epsg_bairros=EPSG_GEOGRAFICO)
+	# modelo.carregar_dados_base()
+	# modelo.carregar_dados_base(path_bairros=PATH_BAIRROS, epsg_bairros=EPSG_GEOGRAFICO)
 	modelo.carregar_pontos_articulacao(PATH_PONTOS_ARTICULACAO)
-	modelo.carregar_rede_viaria(path_vias=PATH_VIAS, epsg_vias=EPSG_GEOGRAFICO)  # <<< ADICIONADO
-	modelo.carregar_e_processar_od(path_od=PATH_OD)
+	modelo.carregar_rede_viaria(path_vias=PATH_VIAS, epsg_vias=EPSG_GEOGRAFICO)
 	modelo.carregar_dados_ibge(2022)
+	# modelo.carregar_e_processar_od(path_od=PATH_OD)
 
 	print("\n--- Processando Dados Demográficos ---")
 	modelo.processar_dados(municipio="Montes Claros")
-	modelo.identificar_polos_desenvolvimento("Distrito Industrial")
+	# modelo.identificar_polos_planejados("Distrito Industrial")
+	modelo.identificar_polos()
 
 	print("\n--- Exibindo Análises Demográficas ---")
 	# modelo.mostrar_centroids()
@@ -35,8 +37,8 @@ def executar_analise_reset():
 	# modelo.mostrar_modelo_completo()
 
 	print("\n--- Iniciando Análise de Rede (Rotas) ---")
-	modelo.gerar_rotas_otimizadas(bairro_central="Centro")
-	modelo.mostrar_rotas_otimizadas()
+	modelo.gerar_rotas_otimizadas()
+	# modelo.mostrar_rotas_otimizadas()
 
 	print("\n>>> Análise RESET e de Rede finalizada. <<<")
 

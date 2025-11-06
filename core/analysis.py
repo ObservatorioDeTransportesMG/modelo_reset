@@ -93,7 +93,7 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 		renda_total_bairro=("renda_mensal_media", "sum"), populacao_total_bairro=("num_de_moradores", "sum")
 	)
 
-	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0)
+	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0).infer_objects(copy=False)
 
 	print("Agregação de renda por bairro finalizada.")
 	if bairros_gdf.crs is None:
@@ -126,9 +126,17 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 	qtd_origem = pontos_origem.groupby("index_right").size()
 	qtd_destino = pontos_destino.groupby("index_right").size()
 
+	colunas_necessarias = ["n_origens", "n_destinos"]
+
 	bairros_result["n_origens"] = bairros_result.index.map(qtd_origem).fillna(0).astype(int)
 	bairros_result["n_destinos"] = bairros_result.index.map(qtd_destino).fillna(0).astype(int)
-	bairros_result["fluxo_total"] = bairros_result["n_origens"] + bairros_result["n_destinos"]
+
+	if set(colunas_necessarias).issubset(bairros_result.columns):
+		bairros_result["fluxo_total"] = bairros_result["n_origens"] + bairros_result["n_destinos"]
+
+	else:
+		bairros_result["fluxo_total"] = 0
+		print("Aviso: Colunas 'n_origens' ou 'n_destinos' não encontradas. 'fluxo_total' foi definido como 0.")
 
 	print("Cálculo de fluxos O/D finalizado.")
 	return bairros_result
@@ -173,6 +181,8 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.6, renda
 
 	densidade = bairros_result["densidade_km2"].quantile(densidade_limiar)
 	renda = bairros_result["renda_total_bairro"].quantile(renda_limiar)
+	if not set("fluxo_total").issubset(bairros_result.columns):
+		bairros_result["fluxo_total"] = 0
 	fluxo = bairros_result["fluxo_total"].quantile(fluxo_limiar)
 
 	# Polo Consolidado
