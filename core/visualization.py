@@ -158,9 +158,7 @@ def plotar_caminhos(
 	gdf_caminhos["cor"] = gdf_caminhos["id"].map(mapa_cores)
 
 	for id_linha, grupo in gdf_caminhos.groupby("id"):
-		bairro_nome = grupo["bairro_origem"].iloc[0]
-		label = f"Rota {id_linha} ({bairro_nome})"
-		grupo.plot(ax=ax, color=grupo["cor"].iloc[0], linewidth=2.5, zorder=3, label=label)
+		grupo.plot(ax=ax, color=grupo["cor"].iloc[0], linewidth=2.5, zorder=3, label=id_linha)
 
 	ax.set_title("Análise de Rota com Algoritmo de Dijkstra")
 	ax.set_xlabel("Coordenada Leste (metros)")

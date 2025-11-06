@@ -1,5 +1,6 @@
-from typing import Literal
+from typing import Literal, Optional
 
+import time
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -114,8 +115,34 @@ def encontrar_no_mais_proximo(ponto: Point, nos_grafo_multipoint: MultiPoint):
 	return (ponto_mais_proximo.x, ponto_mais_proximo.y)
 
 
+def filtrar_sublinhas(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+	"""
+	Remove eficientemente as geometrias de LineString que são "sublinhas", ou seja, que estão completamente contidas dentro de outras LineStrings no mesmo GeoDataFrame.
+
+	Usa uma junção espacial (sjoin) para performance.
+	"""
+	if gdf.empty:
+		print("Geodataframe das linhas vazio.")
+		return gdf
+
+	gdf_com_buffer = gdf.copy()
+	gdf_com_buffer.geometry = gdf.geometry.buffer(1e-2)
+
+	gdf_sjoined = gpd.sjoin(gdf, gdf_com_buffer, how="left", predicate="within")
+
+	linhas_contidas = gdf_sjoined[gdf_sjoined.index != gdf_sjoined["index_right"]]
+
+	indices_das_sublinhas = linhas_contidas.index.unique()
+
+	gdf_filtrado = gdf.drop(index=indices_das_sublinhas)
+
+	print(f"Linhas originais: {len(gdf)} | Sublinhas removidas: {len(indices_das_sublinhas)} | Linhas finais: {len(gdf_filtrado)}")
+
+	return gdf_filtrado
+
+
 def encontrar_caminho_minimo(
-	gdf_bairros: gpd.GeoDataFrame, grafo: nx.MultiDiGraph, bairro_central: str = "Centro", sentido: Literal["IDA", "VOLTA"] = "IDA"
+	gdf_bairros: gpd.GeoDataFrame, grafo: nx.MultiDiGraph, bairro_central: Optional[str] = None, sentido: Literal["IDA", "VOLTA"] = "IDA"
 ) -> gpd.GeoDataFrame:
 	"""
 	Encontra o caminho mínimo entre os centroides dos bairros e um bairro central.
@@ -127,9 +154,18 @@ def encontrar_caminho_minimo(
 		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
 
 	nos_multipoint = MultiPoint([Point(no) for no in grafo.nodes()])
-	bairro_destino = gdf_bairros[gdf_bairros["name"] == bairro_central]
 
-	ponto_bairro_central = bairro_destino.geometry.centroid.item()
+	ponto_bairro_central = gdf_bairros.centroid
+
+	if bairro_central:
+		bairro_destino = gdf_bairros[gdf_bairros["name"] == bairro_central]
+		if bairro_destino.empty:
+			raise ValueError(f"Bairro central '{bairro_central}' não encontrado.")
+		ponto_bairro_central = bairro_destino.geometry.centroid.item()
+	else:
+		print("Nenhum bairro central especificado. Usando o centroide de toda a área de estudo.")
+		area_total = gdf_bairros.geometry.union_all()
+		ponto_bairro_central = area_total.centroid
 
 	if not isinstance(ponto_bairro_central, Point):
 		raise ValueError("Ponto central não encontrado")
@@ -138,7 +174,7 @@ def encontrar_caminho_minimo(
 
 	lista_caminhos = []
 	for index, bairro in enumerate(gdf_bairros.itertuples()):
-		if bairro.name == bairro_central:
+		if bairro_central and bairro.name == bairro_central:
 			continue
 
 		if not isinstance(bairro.geometry, (Polygon, MultiPolygon)):
@@ -153,15 +189,23 @@ def encontrar_caminho_minimo(
 
 		try:
 			caminho_mais_curto = nx.dijkstra_path(grafo, source=source, target=target, weight="weight")
-			lista_caminhos.append({"geometry": LineString(caminho_mais_curto), "bairro_origem": bairro.name, "id": linha_id})
+			if len(caminho_mais_curto) < 2:
+				continue
+			lista_caminhos.append({"geometry": LineString(caminho_mais_curto), "id": linha_id})
 		except nx.NetworkXNoPath:
-			print(f"Não foi possível encontrar um caminho para o bairro no sentido de {sentido}: {bairro.name}.")
+			print(f"Não foi possível encontrar um caminho para o bairro no sentido de {sentido} e index {index}")
+			continue
 
 	if not lista_caminhos:
 		print("Aviso: Nenhum caminho foi gerado no total.")
 		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
 
-	return gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
+	gdf_rotas_brutas = gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
+
+	print(f"Filtrando sublinhas para o sentido: {sentido}")
+	gdf_rotas_filtradas = filtrar_sublinhas(gdf_rotas_brutas)
+
+	return gdf_rotas_filtradas
 
 
 def plotar_caminhos(
@@ -235,6 +279,6 @@ if __name__ == "__main__":
 	caminhos_ida = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="IDA")
 
 	if not caminhos_volta.empty and not caminhos_ida.empty:
-		plotar_caminhos(vias_filtradas, gdf_bairros_proj, caminhos_ida, caminhos_volta)
+		pass
 	else:
 		print("\nAnálise concluída, mas nenhum caminho foi encontrado para plotar.")
