@@ -1,6 +1,5 @@
 from typing import Literal, Optional
 
-import time
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import networkx as nx
