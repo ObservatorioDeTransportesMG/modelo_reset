@@ -74,7 +74,7 @@ def baixar_malha_municipal(diretorio_saida: str, uf: str = "MG", ano: int = 2022
 	Returns:
 		Optional[str]: O caminho para o arquivo .shp principal se o download e a descompactação forem bem-sucedidos, caso contrário None.
 	"""
-	url = f"https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2022/setores/shp/UF/{uf}_setores_CD2022.zip"
+	url = f"https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_{ano}/setores/shp/UF/{uf}_setores_CD{ano}.zip"
 
 	diretorio_extraido = _baixar_e_descompactar_zip(url, diretorio_saida, uf)
 

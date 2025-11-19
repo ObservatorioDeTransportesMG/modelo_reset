@@ -1,9 +1,10 @@
 import os
-from typing import Any
+from typing import Any, Optional
 
 import geopandas as gpd
+import networkx as nx
 
-from . import analysis, data_loader, visualization
+from . import analysis, data_loader, network_design, visualization
 from .ibge_downloader import baixar_dados_censo_renda, baixar_malha_municipal
 
 
@@ -19,10 +20,13 @@ class ModeloReset:
 			crs_projetado (str, optional): O CRS projetado a ser usado para cálculos de área e distância. Padrão é "EPSG:31983".
 		"""
 		self.camadas: dict[str, Any] = {}
+		self.camadas["bairros"] = None
 		self.crs_padrao: str = "EPSG:4326"
 		self.crs_projetado: int = crs_projetado
+		self.grafo: Optional[nx.MultiDiGraph] = None
+		print(f"ModeloReset inicializado. CRS Padrão: {self.crs_padrao}, CRS Projetado: EPSG:{self.crs_projetado}")
 
-	def carregar_dados_base(self, path_bairros: str, epsg_bairros: int):
+	def carregar_dados_base(self, path_bairros: Optional[str] = None, epsg_bairros: Optional[int] = None):
 		"""Carrega as camadas de dados geográficos base (bairros e residências).
 
 		Args:
@@ -30,9 +34,13 @@ class ModeloReset:
 			path_residencias (str): Caminho para o CSV das residências.
 			epsg_bairros (int): Código EPSG original do shapefile de bairros, caso não esteja definido no arquivo.
 		"""
-		print("Carregando dados de base...")
-		self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
-		print("Dados de base carregados.")
+		if path_bairros:
+			if not epsg_bairros:
+				raise ValueError("Para realizar o carregamento dos dados base é preciso passar o paramêtro 'epgs_bairros'.")
+			print("Carregando dados de base...")
+			self.camadas["bairros"] = data_loader.ler_shapefile(path_bairros, self.crs_padrao, epsg_bairros)
+			print("Dados de base carregados.")
+		print("os dados de base serão carregados com os setores censitários do IBGE.")
 
 	def carregar_dados_ibge(self, ano_censo: int, uf: str = "MG"):
 		"""Carrega os dados do IBGE (setores censitários e dados de renda).
@@ -53,7 +61,18 @@ class ModeloReset:
 		self.camadas["dados_de_renda"] = data_loader.ler_renda_csv(path_renda, separador=";")
 		print("Dados do IBGE carregados.")
 
-	def processar_renda_ibge(self, municipio: str):
+	def carregar_rede_viaria(self, path_vias: str, epsg_vias: int = 0):
+		"""Carrega a camada de dados da rede viária (ruas).
+
+		Args:
+			path_vias (str): Caminho para o shapefile das vias.
+			epsg_vias (int): Código EPSG original, se não estiver no .prj.
+		"""
+		print("Carregando rede viária...")
+		self.camadas["vias"] = data_loader.ler_shapefile(path_vias, self.crs_padrao, epsg_vias)
+		print("Rede viária carregada.")
+
+	def _processar_renda_ibge(self, municipio: str):
 		"""Filtra, vincula e agrega dados de renda e população por bairro.
 
 		Args:
@@ -62,16 +81,24 @@ class ModeloReset:
 		"""
 		print("Processando e vinculando dados de renda...")
 		setores_filtrados = analysis.filtrar_setores_por_municipio(self.camadas["setores_censitarios"], municipio)
+		if self.camadas.get("bairros", None) is None:
+			self.camadas["bairros"] = setores_filtrados.copy()
+		self.camadas["bairros"]["tipo_polo"] = "Nenhum"
 		setores_com_renda = analysis.vincular_setores_com_renda(setores_filtrados, self.camadas["dados_de_renda"])
 		bairros_com_renda = analysis.agregar_renda_por_bairro(self.camadas["bairros"], setores_com_renda, self.crs_projetado)
 		self.camadas["bairros"] = bairros_com_renda
 		self.camadas["setores"] = setores_com_renda
 		print("Processamento de renda finalizado.")
 
-	def processar_densidade(self):
+	def _processar_densidade(self):
 		"""Calcula a densidade populacional para a camada de bairros."""
 		print("Calculando densidade populacional...")
 		self.camadas["bairros"] = analysis.calcular_densidade_populacional(self.camadas["bairros"], self.crs_projetado)
+
+	def processar_dados(self, municipio: str):
+		"""Função responsável por processar todos os dados necessários."""
+		self._processar_renda_ibge(municipio)
+		self._processar_densidade()
 
 	def carregar_e_processar_od(self, path_od: str):
 		"""Carrega dados de Origem-Destino e calcula os fluxos por bairro.
@@ -91,7 +118,7 @@ class ModeloReset:
 		self.camadas["bairros"] = analysis.calcular_fluxos_od(self.camadas["bairros"], origem_gdf, destino_gdf)
 		print("Processamento de O/D finalizado.")
 
-	def identificar_polos_desenvolvimento(self, *polos_planejados: str):
+	def identificar_polos_planejados(self, *polos_planejados: str):
 		"""Define polos planejados e identifica polos emergentes e consolidados.
 
 		Args:
@@ -99,6 +126,14 @@ class ModeloReset:
 		"""
 		print("Identificando polos...")
 		self.set_polos_planejados(*polos_planejados)
+		self.camadas["bairros"] = analysis.identificar_polos(self.camadas["bairros"])
+
+	def identificar_polos(self):
+		"""Define polos planejados e identifica polos emergentes e consolidados.
+
+		Args:
+			*polos_planejados (str): Nomes dos bairros a serem classificados como "Planejado".
+		"""
 		self.camadas["bairros"] = analysis.identificar_polos(self.camadas["bairros"])
 
 	def carregar_pontos_articulacao(self, path_pontos: str):
@@ -110,6 +145,24 @@ class ModeloReset:
 		print("Carregando pontos de articulação...")
 		self.camadas["pontos_articulacao"] = data_loader.ler_kml(path_pontos, self.crs_padrao)
 		print(f"Carregados {len(self.camadas['pontos_articulacao'])} pontos.")
+
+	def _projetar_camadas_para_analise(self):
+		"""
+		Garante que todas as camadas de análise estejam projetadas no CRS métrico.
+		"""
+		print(f"Projetando camadas para o CRS métrico: EPSG:{self.crs_projetado}")
+		target_crs = f"EPSG:{self.crs_projetado}"
+
+		camadas_para_projetar = {"bairros": "bairros", "vias": "vias", "pontos_articulacao": "pontos_articulacao"}
+
+		for nome_camada, nome_origem in camadas_para_projetar.items():
+			if nome_origem in self.camadas:
+				if self.camadas[nome_origem].crs != target_crs:
+					self.camadas[nome_camada] = self.camadas[nome_origem].to_crs(target_crs)
+				else:
+					self.camadas[nome_camada] = self.camadas[nome_origem]
+			else:
+				print(f"Aviso: Camada de origem '{nome_origem}' não carregada. Pulando projeção.")
 
 	def set_polos_planejados(self, *args: str):
 		"""Define manualmente quais bairros são classificados como "Planejado".
@@ -124,6 +177,51 @@ class ModeloReset:
 		bairros["tipo_polo"] = "Nenhum"
 		for polo in args:
 			bairros.loc[bairros["name"].isin([polo]), "tipo_polo"] = "Planejado"
+
+	def gerar_rotas_otimizadas(self, bairro_central: Optional[str] = None):
+		"""
+		Orquestra todo o processo de análise de rede.
+
+		1. Projeta as camadas.
+		2. Filtra as vias.
+		3. Gera o grafo ponderado.
+		4. Calcula os caminhos de ida e volta.
+		"""
+		print("Iniciando geração de rotas otimizadas...")
+
+		# 1. Garantir que as camadas estão prontas e projetadas
+		camadas_necessarias = ["bairros", "vias", "pontos_articulacao"]
+		if not all(k in self.camadas for k in camadas_necessarias):
+			raise ValueError("Camadas 'bairros', 'vias' e 'pontos_articulacao' são necessárias. Carregue-as primeiro.")
+
+		self._projetar_camadas_para_analise()
+
+		bairros_proj = self.camadas["bairros"]
+		vias_proj = self.camadas["vias"]
+		pontos_art_proj = self.camadas["pontos_articulacao"]
+
+		# 2. Filtrar vias da área de estudo
+		print("Filtrando rede viária para a área de estudo...")
+		vias_filtradas = network_design.filtrar_vias_por_bairros(vias_proj, bairros_proj)
+		self.camadas["vias_filtradas"] = vias_filtradas
+
+		# 3. Gerar o grafo
+		print("Gerando o grafo ponderado da rede...")
+		self.grafo = network_design.criar_grafo_ponderado(vias_filtradas, pontos_art_proj, bairros_proj)
+
+		if not self.grafo:
+			raise Exception("Falha ao criar o grafo.")
+
+		# 4. Calcular caminhos
+		print("Calculando caminhos de VOLTA...")
+		self.camadas["caminhos_volta"] = network_design.encontrar_caminho_minimo(
+			bairros_proj, self.grafo, bairro_central=bairro_central, sentido="VOLTA"
+		)
+
+		print("Calculando caminhos de IDA...")
+		self.camadas["caminhos_ida"] = network_design.encontrar_caminho_minimo(bairros_proj, self.grafo, bairro_central=bairro_central, sentido="IDA")
+
+		print("Geração de rotas concluída.")
 
 	def mostrar_centroids(self):
 		"""Plota os bairros e os centroides dos setores censitários associados."""
@@ -149,6 +247,20 @@ class ModeloReset:
 	def plotar_renda_media(self):
 		"""Gera e exibe um mapa coroplético da renda média dos bairros."""
 		visualization.plotar_mapa_coropletico(self.camadas["bairros"], self.crs_projetado, "renda_total_bairro", "Renda Média por Bairro", "YlGn")
+
+	def mostrar_rotas_otimizadas(self):
+		"""
+		Exibe o mapa final com as rotas de ida e volta otimizadas.
+		"""
+		print("Gerando visualização das rotas...")
+		camadas_necessarias = ["vias_filtradas", "bairros", "caminhos_ida", "caminhos_volta"]
+		if not all(k in self.camadas for k in camadas_necessarias):
+			print("Camadas de rotas não encontradas. Execute `gerar_rotas_otimizadas()` primeiro.")
+			return
+
+		visualization.plotar_caminhos(
+			self.camadas["vias_filtradas"], self.camadas["bairros"], self.camadas["caminhos_ida"], self.camadas["caminhos_volta"]
+		)
 
 	def mostrar_polos(self):
 		"""Gera e exibe um mapa dos polos de desenvolvimento."""
