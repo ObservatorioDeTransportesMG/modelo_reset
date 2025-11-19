@@ -1,9 +1,8 @@
 from typing import Literal, Optional
 
 import geopandas as gpd
-import matplotlib.pyplot as plt
 import networkx as nx
-from shapely.geometry import LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon
+from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
 from core.data_loader import ler_kml
@@ -21,21 +20,61 @@ def filtrar_vias_por_bairros(gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDat
 	return vias_filtradas
 
 
-def calcular_peso_atrativo(ponto_articulacao: Point, ponto_aresta: Point, peso_original: float):
+def calcular_peso_atrativo(ponto_articulacao: Point, ponto_aresta: Point, centroid_bairro: Point, peso_original: float, tipo_bairro: str = "Nenhum"):
+	"""
+	Calcula o peso da aresta aplicando descontos cumulativos baseados na proximidade de pontos de articulação e do centro do bairro, com preferência por tipo de bairro.
+	"""
+	distancia_articulacao = ponto_articulacao.distance(ponto_aresta)
+	desconto_articulacao = _desconto_ponto_articulacao(distancia_articulacao)
+
+	if tipo_bairro == "Emergente":
+		raio_influencia = 2000
+		max_desconto = 0.5
+	elif tipo_bairro == "Consolidado":
+		raio_influencia = 1500
+		max_desconto = 0.3
+	elif tipo_bairro == "Planejado":
+		raio_influencia = 1000
+		max_desconto = 0.1
+	else:
+		raio_influencia = 1
+		max_desconto = 0.0
+
+	distancia_polo = centroid_bairro.distance(ponto_aresta)
+	desconto_polo = _desconto_polo(distancia_polo, raio_influencia, max_desconto)
+
+	desconto_total = desconto_articulacao + desconto_polo - (desconto_articulacao * desconto_polo)
+
+	peso_final = peso_original * (1 - desconto_total)
+	return max(peso_final, 0.1)
+
+
+def _desconto_ponto_articulacao(distancia: float) -> float:
 	"""
 	Calcula um peso atrativo. Arestas mais próximas do ponto de articulação terão seu peso reduzido, atraindo o caminho mais curto.
 	"""
-	distancia = ponto_articulacao.distance(ponto_aresta)
+	fator_articulacao = max(0, 1 - (distancia / 1000))
 
-	distancia_max_influencia = 1000
-	fator_atracao = max(0, 1 - (distancia / distancia_max_influencia))
-
-	peso_com_desconto = peso_original * (1 - (fator_atracao * 0.5))
-
-	return peso_com_desconto
+	return fator_articulacao * 0.4
 
 
-def criacao_arestas(grafo: nx.MultiDiGraph, linha: LineString, todos_os_pontos_articulacao: MultiPoint, via_id_principal: int, direcao: int):
+def _desconto_polo(distancia: float, raio_influencia: int, max_desconto: float) -> float:
+	"""
+	Calcula o peso atrativo com o centroid do bairro.
+	"""
+	fator_polo = max(0, 1 - (distancia / raio_influencia))
+	return fator_polo * max_desconto
+
+
+def criacao_arestas(
+	grafo: nx.MultiDiGraph,
+	linha: LineString,
+	todos_os_pontos_articulacao: MultiPoint,
+	centroid_bairros: MultiPoint,
+	lista_tipos_bairros: list,
+	via_id_principal: int,
+	direcao: int,
+):
 	"""
 	Função responsável por criar as arestas.
 	"""
@@ -52,9 +91,19 @@ def criacao_arestas(grafo: nx.MultiDiGraph, linha: LineString, todos_os_pontos_a
 			continue
 
 		ponto_medio_segmento = segmento.interpolate(0.5, normalized=True)
-		_, ponto_articulacao_mais_proximo = nearest_points(ponto_medio_segmento, todos_os_pontos_articulacao)
 
-		peso_final_segmento = calcular_peso_atrativo(ponto_articulacao_mais_proximo, ponto_medio_segmento, peso_original_segmento)
+		dists_pontos_articulacao = [p.distance(ponto_medio_segmento) for p in todos_os_pontos_articulacao.geoms]
+		idx_ponto_articulacao_mais_proximo = dists_pontos_articulacao.index(min(dists_pontos_articulacao))
+		dists_bairro = [p.distance(ponto_medio_segmento) for p in centroid_bairros.geoms]
+		idx_bairro_mais_proximo = dists_bairro.index(min(dists_bairro))
+
+		centroid_mais_proximo = centroid_bairros.geoms[idx_bairro_mais_proximo]
+		ponto_articulacao_mais_proximo = todos_os_pontos_articulacao.geoms[idx_ponto_articulacao_mais_proximo]
+		tipo_bairro_atual = lista_tipos_bairros[idx_bairro_mais_proximo]
+
+		peso_final_segmento = calcular_peso_atrativo(
+			ponto_articulacao_mais_proximo, ponto_medio_segmento, centroid_mais_proximo, peso_original_segmento, tipo_bairro=tipo_bairro_atual
+		)
 
 		atributos = {"weight": peso_final_segmento, "original_weight": peso_original_segmento, "via_id": via_id_principal}
 
@@ -67,7 +116,7 @@ def criacao_arestas(grafo: nx.MultiDiGraph, linha: LineString, todos_os_pontos_a
 			grafo.add_edge(ponto_fim_segmento, ponto_inicio_segmento, **atributos)
 
 
-def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gpd.GeoDataFrame) -> nx.MultiDiGraph:
+def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame) -> nx.MultiDiGraph:
 	"""
 	Cria o grafo a partir de um GeoDataFrame de vias JÁ PROJETADO.
 
@@ -82,6 +131,9 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 		raise ValueError("O GeoDataFrame de pontos de articulação está vazio.")
 
 	todos_os_pontos_articulacao = MultiPoint(gdf_pontos_articulacao.geometry.union_all())  # type: ignore
+	bairros_relevantes = gdf_bairros[gdf_bairros["tipo_polo"].isin(["Emergente", "Consolidado"])]
+	centroids_bairros = MultiPoint(bairros_relevantes.centroid.geometry.union_all())  # type: ignore
+	lista_tipos_bairros = bairros_relevantes["tipo_polo"].tolist()
 
 	for via in gdf_vias.itertuples():
 		geometrias = []
@@ -100,7 +152,7 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 			raise ValueError("Erro na direção ou no id da via")
 
 		for linha in geometrias:
-			criacao_arestas(grafo, linha, todos_os_pontos_articulacao, via_id_principal, direcao)
+			criacao_arestas(grafo, linha, todos_os_pontos_articulacao, centroids_bairros, lista_tipos_bairros, via_id_principal, direcao)
 
 	print(f"Grafo direcionado criado com {grafo.number_of_nodes()} nós e {grafo.number_of_edges()} arestas.")
 	return grafo
@@ -140,13 +192,54 @@ def filtrar_sublinhas(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 	return gdf_filtrado
 
 
+def _obter_ponto_central(gdf_bairros: gpd.GeoDataFrame, nome_bairro_central: Optional[str]) -> Point:
+	"""
+	Determina a geometria do ponto central (hub). Se um nome for fornecido, usa o centroide desse bairro. Caso contrário, usa o centroide da área total.
+	"""
+	if nome_bairro_central:
+		nome_limpo = nome_bairro_central.strip()
+		bairro_destino = gdf_bairros[gdf_bairros["name"].str.strip() == nome_limpo]
+
+		if bairro_destino.empty:
+			raise ValueError(f"Bairro central '{nome_limpo}' não encontrado.")
+
+		ponto = bairro_destino.geometry.centroid.item()
+	else:
+		print("Nenhum bairro central especificado. Usando o centroide de toda a área de estudo.")
+		area_total = gdf_bairros.geometry.unary_union
+		ponto = area_total.centroid
+
+	if not isinstance(ponto, Point):
+		raise ValueError("Falha ao determinar o ponto central (geometria inválida).")
+
+	return ponto
+
+
+def _calcular_rota_individual(
+	grafo: nx.MultiDiGraph, no_origem: tuple[float, float], no_destino: tuple[float, float], sentido: Literal["IDA", "VOLTA"]
+) -> Optional[LineString]:
+	"""
+	Calcula o caminho mínimo entre dois nós do grafo e retorna a LineString. Retorna None se não houver caminho ou se o caminho for trivial (ponto único).
+	"""
+	source, target = (no_origem, no_destino) if sentido == "IDA" else (no_destino, no_origem)
+
+	try:
+		caminho_nos = nx.dijkstra_path(grafo, source=source, target=target, weight="weight")
+
+		if len(caminho_nos) < 2:
+			return None
+
+		return LineString(caminho_nos)
+
+	except nx.NetworkXNoPath:
+		return None
+
+
 def encontrar_caminho_minimo(
 	gdf_bairros: gpd.GeoDataFrame, grafo: nx.MultiDiGraph, bairro_central: Optional[str] = None, sentido: Literal["IDA", "VOLTA"] = "IDA"
 ) -> gpd.GeoDataFrame:
 	"""
-	Encontra o caminho mínimo entre os centroides dos bairros e um bairro central.
-
-	Assume que TODOS os dados de entrada estão em um CRS projetado.
+	Orquestra o cálculo de rotas entre todos os bairros e um ponto central.
 	"""
 	if grafo.number_of_nodes() == 0:
 		print("Aviso: O grafo está vazio. Nenhum caminho pode ser calculado.")
@@ -154,101 +247,47 @@ def encontrar_caminho_minimo(
 
 	nos_multipoint = MultiPoint([Point(no) for no in grafo.nodes()])
 
-	ponto_bairro_central = gdf_bairros.centroid
-
-	if bairro_central:
-		bairro_destino = gdf_bairros[gdf_bairros["name"] == bairro_central]
-		if bairro_destino.empty:
-			raise ValueError(f"Bairro central '{bairro_central}' não encontrado.")
-		ponto_bairro_central = bairro_destino.geometry.centroid.item()
-	else:
-		print("Nenhum bairro central especificado. Usando o centroide de toda a área de estudo.")
-		area_total = gdf_bairros.geometry.union_all()
-		ponto_bairro_central = area_total.centroid
-
-	if not isinstance(ponto_bairro_central, Point):
-		raise ValueError("Ponto central não encontrado")
-
-	no_central = encontrar_no_mais_proximo(ponto_bairro_central, nos_multipoint)
+	ponto_central_geom = _obter_ponto_central(gdf_bairros, bairro_central)
+	no_central = encontrar_no_mais_proximo(ponto_central_geom, nos_multipoint)
 
 	lista_caminhos = []
+	bairro_central_limpo = bairro_central.strip() if bairro_central else None
+
 	for index, bairro in enumerate(gdf_bairros.itertuples()):
-		if bairro_central and bairro.name == bairro_central:
+		if bairro_central_limpo and bairro.name.strip() == bairro_central_limpo:
 			continue
 
-		if not isinstance(bairro.geometry, (Polygon, MultiPolygon)):
+		if bairro.geometry.geom_type not in ("Polygon", "MultiPolygon"):
 			continue
 
 		ponto_bairro = bairro.geometry.centroid
 		no_bairro = encontrar_no_mais_proximo(ponto_bairro, nos_multipoint)
 
-		source, target = (no_bairro, no_central) if sentido == "IDA" else (no_central, no_bairro)
+		geometria_rota = _calcular_rota_individual(grafo, no_bairro, no_central, sentido)
 
-		linha_id = f"{index}{sentido[0]}"
+		if geometria_rota:
+			gdf_temp = gpd.GeoDataFrame([{"geometry": geometria_rota}], crs=PROJECTED_CRS)
+			intersectados = gpd.sjoin(gdf_temp, gdf_bairros, how="inner", predicate="intersects")
+			nomes_bairros = intersectados["name"].unique()
 
-		try:
-			caminho_mais_curto = nx.dijkstra_path(grafo, source=source, target=target, weight="weight")
-			if len(caminho_mais_curto) < 2:
-				continue
-			lista_caminhos.append({"geometry": LineString(caminho_mais_curto), "id": linha_id})
-		except nx.NetworkXNoPath:
-			print(f"Não foi possível encontrar um caminho para o bairro no sentido de {sentido} e index {index}")
-			continue
+			lista_caminhos.append({
+				"geometry": geometria_rota,
+				"id": f"{index}{sentido[0]}",
+				"bairro_origem": bairro.name,
+				"bairros_atendidos_n": len(nomes_bairros),
+				"bairros_lista": ", ".join(nomes_bairros),
+			})
+		else:
+			pass
 
 	if not lista_caminhos:
-		print("Aviso: Nenhum caminho foi gerado no total.")
+		print(f"Aviso: Nenhum caminho gerado no sentido {sentido}.")
 		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
 
-	gdf_rotas_brutas = gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
+	gdf_rotas = gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
 
-	print(f"Filtrando sublinhas para o sentido: {sentido}")
-	gdf_rotas_filtradas = filtrar_sublinhas(gdf_rotas_brutas)
-
-	return gdf_rotas_filtradas
-
-
-def plotar_caminhos(
-	gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame, gdf_caminho_ida: gpd.GeoDataFrame, gdf_caminho_volta: gpd.GeoDataFrame
-):
-	"""
-	Função responsável por fazer a plotagem dos caminhos, com cada linha tendo uma cor única referenciada pelo seu ID na legenda.
-	"""
-	fig, ax = plt.subplots(figsize=(12, 12))
-
-	gdf_vias.plot(ax=ax, color="gray", linewidth=0.5, zorder=1, label="Sistema Viário")
-	gdf_bairros.plot(ax=ax, facecolor="none", edgecolor="none", zorder=2, label="Limites dos Bairros")
-	gdf_bairros.centroid.plot(ax=ax, color="black", marker="*", markersize=100, zorder=4, label="Centroides")
-
-	gdf_caminhos = gpd.pd.concat([gdf_caminho_ida, gdf_caminho_volta])
-
-	if gdf_caminhos.crs is None or not isinstance(gdf_caminhos, gpd.GeoDataFrame):
-		raise ValueError("Erro com o CRS do geoDataframes dos caminhos")
-
-	lista_ids = gdf_caminhos["id"].unique()
-
-	import matplotlib
-
-	cores = matplotlib.colormaps.get_cmap("hsv")
-
-	mapa_cores = {linha_id: cores(i) for i, linha_id in enumerate(lista_ids)}
-
-	for _, caminho in gdf_caminhos.iterrows():
-		linha_id = caminho["id"]
-		cor = mapa_cores[linha_id]
-
-		gpd.GeoSeries(caminho.geometry, crs=gdf_caminhos.crs).plot(
-			ax=ax, color=cor, linewidth=2.5, zorder=3, label=f"ID: {linha_id} ({caminho['bairro_origem']})"
-		)
-
-	ax.set_title("Análise de Rota com Algoritmo de Dijkstra")
-	ax.set_xlabel("Coordenada Leste (metros)")
-	ax.set_ylabel("Coordenada Norte (metros)")
-
-	# ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.0, ncols=3)
-
-	plt.tight_layout()
-	plt.grid(True)
-	plt.show()
+	print(f"Filtrando sublinhas para o sentido: {sentido}...")
+	return filtrar_sublinhas(gdf_rotas)
 
 
 if __name__ == "__main__":
@@ -271,7 +310,7 @@ if __name__ == "__main__":
 	vias_filtradas = vias_filtradas.drop_duplicates(subset="ID")
 
 	print("\nIniciando a criação do grafo...")
-	grafo = criar_grafo_ponderado(vias_filtradas, gdf_pontos_articulacao_proj)
+	grafo = criar_grafo_ponderado(vias_filtradas, gdf_pontos_articulacao_proj, gdf_bairros_proj)
 
 	print("\nCalculando os caminhos mínimos...")
 	caminhos_volta = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="VOLTA")
