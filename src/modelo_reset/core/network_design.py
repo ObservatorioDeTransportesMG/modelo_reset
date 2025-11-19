@@ -5,7 +5,7 @@ import networkx as nx
 from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
-from core.data_loader import ler_kml
+from .data_loader import ler_kml
 
 PROJECTED_CRS = "EPSG:31983"
 GEOGRAPHIC_CRS = "EPSG:4326"
@@ -268,7 +268,8 @@ def encontrar_caminho_minimo(
 		if geometria_rota:
 			gdf_temp = gpd.GeoDataFrame([{"geometry": geometria_rota}], crs=PROJECTED_CRS)
 			intersectados = gpd.sjoin(gdf_temp, gdf_bairros, how="inner", predicate="intersects")
-			nomes_bairros = intersectados["name"].unique()
+			nome_coluna = "CD_SETOR" if "CD_SETOR" in intersectados.columns else "name"
+			nomes_bairros = intersectados[nome_coluna].unique()
 
 			lista_caminhos.append({
 				"geometry": geometria_rota,

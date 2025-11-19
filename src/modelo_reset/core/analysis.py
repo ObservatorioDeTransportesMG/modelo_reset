@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
-from utils.constants import COLUNAS
+from ..utils.constants import COLUNAS
 
 
 def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str) -> gpd.GeoDataFrame:
