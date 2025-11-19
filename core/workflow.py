@@ -207,7 +207,7 @@ class ModeloReset:
 
 		# 3. Gerar o grafo
 		print("Gerando o grafo ponderado da rede...")
-		self.grafo = network_design.criar_grafo_ponderado(vias_filtradas, pontos_art_proj)
+		self.grafo = network_design.criar_grafo_ponderado(vias_filtradas, pontos_art_proj, bairros_proj)
 
 		if not self.grafo:
 			raise Exception("Falha ao criar o grafo.")
