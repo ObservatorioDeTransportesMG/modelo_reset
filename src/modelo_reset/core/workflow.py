@@ -5,7 +5,7 @@ import geopandas as gpd
 import networkx as nx
 
 from ..utils import columns, constants
-from . import analysis, data_loader, network_design, visualization
+from . import analysis, data_exporter, data_loader, network_design, visualization
 from .ibge_downloader import baixar_dados_censo_renda, baixar_malha_municipal
 
 
@@ -224,6 +224,11 @@ class ModeloReset:
 			bairros_proj, self.grafo, bairro_central=bairro_central, sentido="IDA"
 		)
 
+		self.camadas[columns.CAMADA_ROTAS_CONCATENADAS] = gpd.pd.concat([
+			self.camadas[columns.CAMADA_CAMINHO_VOLTA],
+			self.camadas[columns.CAMADA_CAMINHO_IDA],
+		])
+
 		print("Geração de rotas concluída.")
 
 	def mostrar_centroids(self):
@@ -279,3 +284,24 @@ class ModeloReset:
 		visualization.plotar_modelo_completo(
 			self.camadas[columns.CAMADA_BAIRRO], self.camadas.get(columns.CAMADA_PONTOS_ARTICULACO, gpd.GeoDataFrame()), self.crs_projetado
 		)
+
+	def exportar_resultados(self, pasta_saida: str = "resultados"):
+		"""
+		Exporta as camadas processadas para arquivos físicos.
+		"""
+		print(f"\n>>> Exportando resultados para pasta '{pasta_saida}'... <<<")
+
+		if "rotas_concatenadas" in self.camadas:
+			data_exporter.exportar_geodataframe(
+				self.camadas[columns.CAMADA_ROTAS_CONCATENADAS], caminho_saida=f"{pasta_saida}/rotas_finais.geojson", formato="geojson"
+			)
+
+		if "bairros" in self.camadas:
+			data_exporter.exportar_geodataframe(
+				self.camadas[columns.CAMADA_BAIRRO],
+				caminho_saida=f"{pasta_saida}/bairros_analisados.shp",
+				formato="shapefile",
+				crs_saida=self.crs_projetado,
+			)
+
+		print("Exportação concluída.")
