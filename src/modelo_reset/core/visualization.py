@@ -5,22 +5,14 @@ from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-# from matplotlib_map_utils.core.north_arrow import north_arrow
-# from matplotlib_map_utils.core.scale_bar import scale_bar
+from ..utils import columns
 
 
-def crs_epsg_para_utm_zone(epsg: int) -> int:
-	"""Extrai a zona UTM do código EPSG para projeções SIRGAS 2000 no hemisfério sul."""
-	if 31978 <= epsg <= 31985:
-		return epsg - 31960
-	return 0  # Retorno padrão caso não seja um EPSG esperado
-
-
-def configurar_mapa(ax: Axes, titulo: str, crs_epsg: int):
+def configurar_mapa(ax: Axes, titulo: str, crs_epsg: str):
 	"""Função responsável por fazer a configuração padrão dos mapas."""
 	ax.set_title(titulo, fontsize=16)
 	ax.set_axis_off()
-	texto_atribuicao = f"Fonte: Autor\nProjeção: SIRGAS 2000 / UTM Zone {crs_epsg_para_utm_zone(crs_epsg)}S (EPSG:{crs_epsg})"
+	texto_atribuicao = f"Fonte: Autor\nProjeção: SIRGAS 2000 / UTM Zone ({crs_epsg})"
 
 	ax.text(x=0.5, y=0.01, s=texto_atribuicao, transform=ax.transAxes, ha="center", va="bottom", fontsize="medium", color="black", style="italic")
 	# scale_bar(ax=ax, location="lower left", style="boxes", bar={"projection": crs_epsg})
@@ -28,12 +20,12 @@ def configurar_mapa(ax: Axes, titulo: str, crs_epsg: int):
 	return ax
 
 
-def plotar_mapa_coropletico(gdf: gpd.GeoDataFrame, crs_projetado: int, coluna: str, titulo: str, cmap: str = "viridis"):
+def plotar_mapa_coropletico(gdf: gpd.GeoDataFrame, crs_projetado: str, coluna: str, titulo: str, cmap: str = "viridis"):
 	"""Plota um mapa coroplético (de cores) a partir de uma coluna do GeoDataFrame.
 
 	Args:
 		gdf (gpd.GeoDataFrame): O GeoDataFrame a ser plotado.
-		crs_projetado (int): Crs projetado.
+		crs_projetado (str): Crs projetado.
 		coluna (str): O nome da coluna cujos valores serão usados para a coloração.
 		titulo (str): O título a ser exibido no topo do mapa.
 		cmap (str, optional): O mapa de cores (colormap) a ser utilizado. Padrão é "viridis".
@@ -46,14 +38,14 @@ def plotar_mapa_coropletico(gdf: gpd.GeoDataFrame, crs_projetado: int, coluna: s
 	plt.show()
 
 
-def plotar_polos(gdf_bairros: gpd.GeoDataFrame, crs_projetado: int):
+def plotar_polos(gdf_bairros: gpd.GeoDataFrame, crs_projetado: str):
 	"""Plota um mapa dos bairros coloridos de acordo com seu "Tipo de Polo".
 
 	Args:
-		gdf_bairros (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter a coluna "tipo_polo".
+		gdf_bairros (gpd.GeoDataFrame): O GeoDataFrame de bairros, que deve conter a coluna columns.POLO.
 		crs_projetado (int): Crs projetado.
 	"""
-	if "tipo_polo" not in gdf_bairros.columns:
+	if columns.POLO not in gdf_bairros.columns:
 		print("Coluna 'tipo_polo' não encontrada. Execute a análise de polos primeiro.")
 		return
 
@@ -62,7 +54,7 @@ def plotar_polos(gdf_bairros: gpd.GeoDataFrame, crs_projetado: int):
 	gdf_proj = gdf_bairros.to_crs(crs_projetado)
 
 	color_map = {"Consolidado": "green", "Emergente": "orange", "Planejado": "blue", "Nenhum": "lightgrey"}
-	gdf_proj.plot(color=gdf_bairros["tipo_polo"].map(color_map), ax=ax, edgecolor="white", linewidth=0.5)
+	gdf_proj.plot(color=gdf_bairros[columns.POLO].map(color_map), ax=ax, edgecolor="white", linewidth=0.5)
 
 	legend_elements = [Patch(facecolor=color, edgecolor="w", label=label) for label, color in color_map.items()]
 
@@ -73,7 +65,7 @@ def plotar_polos(gdf_bairros: gpd.GeoDataFrame, crs_projetado: int):
 	plt.show()
 
 
-def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDataFrame, crs_projetado: int):
+def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDataFrame, crs_projetado: str):
 	"""Plota os polígonos dos bairros e os centroides dos setores censitários.
 
 	Args:
@@ -103,11 +95,11 @@ def plotar_centroid_e_bairros(gdf_bairros: gpd.GeoDataFrame, gdf_ibge: gpd.GeoDa
 	plt.show()
 
 
-def plotar_modelo_completo(gdf_bairros: gpd.GeoDataFrame, gdf_pontos: gpd.GeoDataFrame, crs_projetado: int):
+def plotar_modelo_completo(gdf_bairros: gpd.GeoDataFrame, gdf_pontos: gpd.GeoDataFrame, crs_projetado: str):
 	"""Plota o mapa de polos de desenvolvimento junto com pontos de interesse.
 
 	Args:
-		gdf_bairros (gpd.GeoDataFrame): GeoDataFrame dos bairros, com a coluna "tipo_polo".
+		gdf_bairros (gpd.GeoDataFrame): GeoDataFrame dos bairros, com a coluna columns.POLO.
 		gdf_pontos (gpd.GeoDataFrame): GeoDataFrame contendo os pontos de interesse (ex: pontos de articulação) a serem sobrepostos no mapa.
 		crs_projetado (int): Crs projetado.
 	"""
@@ -115,7 +107,7 @@ def plotar_modelo_completo(gdf_bairros: gpd.GeoDataFrame, gdf_pontos: gpd.GeoDat
 
 	color_map = {"Consolidado": "green", "Emergente": "orange", "Planejado": "blue", "Nenhum": "lightgrey"}
 	gdf_bairros_plot = gdf_bairros.to_crs(crs_projetado)
-	gdf_bairros_plot.plot(color=gdf_bairros["tipo_polo"].map(color_map), ax=ax, edgecolor="white", linewidth=0.5)
+	gdf_bairros_plot.plot(color=gdf_bairros[columns.POLO].map(color_map), ax=ax, edgecolor="white", linewidth=0.5)
 
 	if not gdf_pontos.empty:
 		gdf_pontos_proj = gdf_pontos.to_crs(crs_projetado)

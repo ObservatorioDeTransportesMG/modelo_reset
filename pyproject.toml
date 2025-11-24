@@ -1,6 +1,6 @@
 [project]
 name = "modelo-reset"
-version = "0.1.2"
+version = "0.1.4"
 description = "Modelo Reset - Criação da estrutura das linhas de ônibus baseando-se em possíveis polos e micro polos"
 readme = "README.md"
 requires-python = ">=3.10"

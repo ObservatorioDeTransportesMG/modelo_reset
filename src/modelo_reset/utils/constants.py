@@ -6,8 +6,9 @@ COLUNAS = {
 	"V06005": "variancia_de_renda",
 }
 
-CRS_GEO = 4326
-CRS_PROJETADO = 31983
+CRS_PROJETADO = "EPSG:31983"
+CRS_GEOGRAFICO = "EPSG:4326"
 
 SHAPEFILE_NAME = "_setores_CD2022.shp"
 CSV_NAME = "Agregados_por_setores_renda_responsavel_BR.csv"
+

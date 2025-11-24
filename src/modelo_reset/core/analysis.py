@@ -1,6 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
+from ..utils import columns
 from ..utils.constants import COLUNAS
 
 
@@ -16,14 +17,17 @@ def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str)
 		gpd.GeoDataFrame: Um novo GeoDataFrame contendo apenas os setores do município e UF especificados.
 	"""
 	print(f"Filtrando setores para {municipio.upper()}...")
-	filtro = setores_gdf["NM_MUN"].str.upper() == municipio.upper()
+	filtro = setores_gdf[columns.NOME_MUNICIPIO].str.upper() == municipio.upper()
 	setores_filtrados = setores_gdf[filtro].copy()
 	print(f"Encontrados {len(setores_filtrados)} setores.")
 	return setores_filtrados
 
 
 def vincular_setores_com_renda(
-	setores_filtrados_gdf: gpd.GeoDataFrame, renda_df: pd.DataFrame, coluna_setor_shp: str = "CD_SETOR", coluna_setor_csv: str = "CD_SETOR"
+	setores_filtrados_gdf: gpd.GeoDataFrame,
+	renda_df: pd.DataFrame,
+	coluna_setor_shp: str = columns.CODIGO_SETOR,
+	coluna_setor_csv: str = columns.CODIGO_SETOR,
 ) -> gpd.GeoDataFrame:
 	"""Vincula dados de renda a um GeoDataFrame de setores censitários.
 
@@ -44,7 +48,7 @@ def vincular_setores_com_renda(
 	return setores_com_renda
 
 
-def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
+def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
 	"""Associa dados de setores censitários (IBGE) aos polígonos de bairros.
 
 	Args:
@@ -75,7 +79,7 @@ def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: 
 	return join_espacial[join_espacial["index_right"].notna()]
 
 
-def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
+def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
 	"""Agrega dados de renda e população dos setores para a camada de bairros.
 
 	Args:
@@ -126,23 +130,23 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 	qtd_origem = pontos_origem.groupby("index_right").size()
 	qtd_destino = pontos_destino.groupby("index_right").size()
 
-	colunas_necessarias = ["n_origens", "n_destinos"]
+	colunas_necessarias = [columns.ORIGEM, columns.DESTINO]
 
-	bairros_result["n_origens"] = bairros_result.index.map(qtd_origem).fillna(0).astype(int)
-	bairros_result["n_destinos"] = bairros_result.index.map(qtd_destino).fillna(0).astype(int)
+	bairros_result[columns.ORIGEM] = bairros_result.index.map(qtd_origem).fillna(0).astype(int)
+	bairros_result[columns.DESTINO] = bairros_result.index.map(qtd_destino).fillna(0).astype(int)
 
 	if set(colunas_necessarias).issubset(bairros_result.columns):
-		bairros_result["fluxo_total"] = bairros_result["n_origens"] + bairros_result["n_destinos"]
+		bairros_result[columns.FLUXO] = bairros_result[columns.ORIGEM] + bairros_result[columns.DESTINO]
 
 	else:
-		bairros_result["fluxo_total"] = 0
+		bairros_result[columns.FLUXO] = 0
 		print("Aviso: Colunas 'n_origens' ou 'n_destinos' não encontradas. 'fluxo_total' foi definido como 0.")
 
 	print("Cálculo de fluxos O/D finalizado.")
 	return bairros_result
 
 
-def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado: int) -> gpd.GeoDataFrame:
+def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado: str) -> gpd.GeoDataFrame:
 	"""Calcula a densidade populacional por bairro (habitantes por km²).
 
 	Args:
@@ -154,10 +158,10 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 	"""
 	bairros_proj = bairros_gdf.to_crs(crs_projetado)
 
-	bairros_proj["area_km2"] = bairros_proj.geometry.area / 1_000_000
+	bairros_proj[columns.AREA] = bairros_proj.geometry.area / 1_000_000
 
-	bairros_proj["populacao_total_bairro"] = bairros_proj["populacao_total_bairro"].astype(int)
-	bairros_proj["densidade_km2"] = bairros_proj["populacao_total_bairro"] / bairros_proj["area_km2"]
+	bairros_proj[columns.POPULACAO] = bairros_proj[columns.POPULACAO].astype(int)
+	bairros_proj[columns.DENSIDADE] = bairros_proj[columns.POPULACAO] / bairros_proj[columns.AREA]
 
 	print("Cálculo de densidade finalizado.")
 	if bairros_gdf.crs is None:
@@ -179,22 +183,22 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.6, renda
 	"""
 	bairros_result = bairros_gdf.copy()
 
-	densidade = bairros_result["densidade_km2"].quantile(densidade_limiar)
-	renda = bairros_result["renda_total_bairro"].quantile(renda_limiar)
-	if not set("fluxo_total").issubset(bairros_result.columns):
-		bairros_result["fluxo_total"] = 0
-	fluxo = bairros_result["fluxo_total"].quantile(fluxo_limiar)
+	densidade = bairros_result[columns.DENSIDADE].quantile(densidade_limiar)
+	renda = bairros_result[columns.RENDA].quantile(renda_limiar)
+	if not set(columns.FLUXO).issubset(bairros_result.columns):
+		bairros_result[columns.FLUXO] = 0
+	fluxo = bairros_result[columns.FLUXO].quantile(fluxo_limiar)
 
 	# Polo Consolidado
 	bairros_result.loc[
-		(bairros_result["densidade_km2"] >= densidade) & (bairros_result["renda_total_bairro"] <= renda) & (bairros_result["fluxo_total"] >= fluxo),
-		"tipo_polo",
+		(bairros_result[columns.DENSIDADE] >= densidade) & (bairros_result[columns.RENDA] <= renda) & (bairros_result[columns.FLUXO] >= fluxo),
+		columns.POLO,
 	] = "Consolidado"
 
 	# Polo Emergente
 	bairros_result.loc[
-		(bairros_result["densidade_km2"] >= densidade) & (bairros_result["renda_total_bairro"] <= renda) & (bairros_result["fluxo_total"] <= fluxo),
-		"tipo_polo",
+		(bairros_result[columns.DENSIDADE] >= densidade) & (bairros_result[columns.RENDA] <= renda) & (bairros_result[columns.FLUXO] <= fluxo),
+		columns.POLO,
 	] = "Emergente"
 
 	print("Identificação de Polos finalizada.")
