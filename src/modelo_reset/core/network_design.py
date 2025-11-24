@@ -5,10 +5,8 @@ import networkx as nx
 from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
-from core.data_loader import ler_kml
-
-PROJECTED_CRS = "EPSG:31983"
-GEOGRAPHIC_CRS = "EPSG:4326"
+from ..utils import columns, constants
+from .data_loader import ler_kml
 
 
 def filtrar_vias_por_bairros(gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -131,9 +129,9 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 		raise ValueError("O GeoDataFrame de pontos de articulação está vazio.")
 
 	todos_os_pontos_articulacao = MultiPoint(gdf_pontos_articulacao.geometry.union_all())  # type: ignore
-	bairros_relevantes = gdf_bairros[gdf_bairros["tipo_polo"].isin(["Emergente", "Consolidado"])]
+	bairros_relevantes = gdf_bairros[gdf_bairros[columns.POLO].isin(["Emergente", "Consolidado"])]
 	centroids_bairros = MultiPoint(bairros_relevantes.centroid.geometry.union_all())  # type: ignore
-	lista_tipos_bairros = bairros_relevantes["tipo_polo"].tolist()
+	lista_tipos_bairros = bairros_relevantes[columns.POLO].tolist()
 
 	for via in gdf_vias.itertuples():
 		geometrias = []
@@ -206,7 +204,7 @@ def _obter_ponto_central(gdf_bairros: gpd.GeoDataFrame, nome_bairro_central: Opt
 		ponto = bairro_destino.geometry.centroid.item()
 	else:
 		print("Nenhum bairro central especificado. Usando o centroide de toda a área de estudo.")
-		area_total = gdf_bairros.geometry.unary_union
+		area_total = gdf_bairros.geometry.union_all()
 		ponto = area_total.centroid
 
 	if not isinstance(ponto, Point):
@@ -243,7 +241,7 @@ def encontrar_caminho_minimo(
 	"""
 	if grafo.number_of_nodes() == 0:
 		print("Aviso: O grafo está vazio. Nenhum caminho pode ser calculado.")
-		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
+		return gpd.GeoDataFrame(crs=constants.CRS_PROJETADO)
 
 	nos_multipoint = MultiPoint([Point(no) for no in grafo.nodes()])
 
@@ -266,9 +264,10 @@ def encontrar_caminho_minimo(
 		geometria_rota = _calcular_rota_individual(grafo, no_bairro, no_central, sentido)
 
 		if geometria_rota:
-			gdf_temp = gpd.GeoDataFrame([{"geometry": geometria_rota}], crs=PROJECTED_CRS)
+			gdf_temp = gpd.GeoDataFrame([{"geometry": geometria_rota}], crs=constants.CRS_PROJETADO)
 			intersectados = gpd.sjoin(gdf_temp, gdf_bairros, how="inner", predicate="intersects")
-			nomes_bairros = intersectados["name"].unique()
+			nome_coluna = "CD_SETOR" if "CD_SETOR" in intersectados.columns else "name"
+			nomes_bairros = intersectados[nome_coluna].unique()
 
 			lista_caminhos.append({
 				"geometry": geometria_rota,
@@ -282,9 +281,9 @@ def encontrar_caminho_minimo(
 
 	if not lista_caminhos:
 		print(f"Aviso: Nenhum caminho gerado no sentido {sentido}.")
-		return gpd.GeoDataFrame(crs=PROJECTED_CRS)
+		return gpd.GeoDataFrame(crs=constants.CRS_PROJETADO)
 
-	gdf_rotas = gpd.GeoDataFrame(lista_caminhos, crs=PROJECTED_CRS)
+	gdf_rotas = gpd.GeoDataFrame(lista_caminhos, crs=constants.CRS_PROJETADO)
 
 	print(f"Filtrando sublinhas para o sentido: {sentido}...")
 	return filtrar_sublinhas(gdf_rotas)
@@ -294,16 +293,16 @@ if __name__ == "__main__":
 	try:
 		gdf_vias_orig = gpd.read_file("arquivos/Shapes para Mapas/Sistema viario.shp")
 		gdf_bairros_orig = gpd.read_file("arquivos/limites_bairros_moc/limites_bairros_moc.shp")
-		gdf_pontos_articulacao_orig = ler_kml("arquivos/pontos_articulacao.kml", GEOGRAPHIC_CRS)
+		gdf_pontos_articulacao_orig = ler_kml("arquivos/pontos_articulacao.kml", constants.CRS_GEOGRAFICO)
 
 	except Exception as e:
 		print(f"Erro ao ler os arquivos shapefile: {e}")
 		exit()
 
-	print(f"Projetando dados para o CRS métrico: {PROJECTED_CRS}")
-	gdf_vias_proj = gdf_vias_orig.to_crs(PROJECTED_CRS)
-	gdf_bairros_proj = gdf_bairros_orig.to_crs(PROJECTED_CRS)
-	gdf_pontos_articulacao_proj = gdf_pontos_articulacao_orig.to_crs(PROJECTED_CRS)
+	print(f"Projetando dados para o CRS métrico: {constants.CRS_PROJETADO}")
+	gdf_vias_proj = gdf_vias_orig.to_crs(constants.CRS_PROJETADO)
+	gdf_bairros_proj = gdf_bairros_orig.to_crs(constants.CRS_PROJETADO)
+	gdf_pontos_articulacao_proj = gdf_pontos_articulacao_orig.to_crs(constants.CRS_PROJETADO)
 	# gdf_bairros_proj = gdf_bairros_proj[gdf_bairros_proj["name"].isin(["Morrinhos", "Centro"])]
 
 	vias_filtradas = gpd.sjoin(gdf_vias_proj, gdf_bairros_proj, how="inner", predicate="intersects")

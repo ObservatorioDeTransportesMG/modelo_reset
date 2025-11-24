@@ -2,28 +2,30 @@ import geopandas as gpd
 import pandas as pd
 from pyogrio import list_layers
 
+from ..utils import constants
 
-def ler_shapefile(path: str, target_crs: str, original_epsg: int = 4326) -> gpd.GeoDataFrame:
+
+def ler_shapefile(path: str, target_crs: str, original_crs: str = constants.CRS_GEOGRAFICO) -> gpd.GeoDataFrame:
 	"""Lê um shapefile, define seu CRS se ausente e o converte para um CRS de destino.
 
 	Args:
 		path (str): O caminho para o arquivo shapefile.
 		target_crs (str): O CRS de destino para o qual o GeoDataFrame será convertido.
-		original_epsg (int, optional): O código EPSG a ser assumido se o arquivo não tiver um CRS definido. Padrão é 4326.
+		original_crs (str, optional): O código EPSG a ser assumido se o arquivo não tiver um CRS definido. Padrão é 4326.
 
 	Returns:
 		gpd.GeoDataFrame: Um GeoDataFrame lido a partir do arquivo e convertido para o CRS de destino.
 	"""
 	shapefile = gpd.read_file(path, ignore_geometry=False)
 	if shapefile.crs is None:
-		print(f"Aviso: CRS não definido para {path}. Assumindo EPSG:{original_epsg}.")
-		shapefile = shapefile.set_crs(epsg=original_epsg, inplace=True)
+		print(f"Aviso: CRS não definido para {path}. Assumindo {original_crs}.")
+		shapefile = shapefile.set_crs(crs=original_crs, inplace=True)
 
 	shapefile = shapefile.to_crs(target_crs)
 	return shapefile
 
 
-def ler_residencias_csv(path: str, crs: str = "EPSG:4326") -> gpd.GeoDataFrame:
+def ler_residencias_csv(path: str, crs: str = constants.CRS_GEOGRAFICO) -> gpd.GeoDataFrame:
 	"""Lê um CSV de residências e o converte para um GeoDataFrame de pontos.
 
 	Args:
@@ -87,7 +89,7 @@ def ler_kml(path: str, target_crs: str) -> gpd.GeoDataFrame:
 		if not gdfs:
 			raise ValueError("Nenhuma camada encontrada no arquivo KML.")
 
-		concatenated_gdf = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True), crs="EPSG:4326")
+		concatenated_gdf = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True), crs=constants.CRS_GEOGRAFICO)
 		return concatenated_gdf.to_crs(target_crs)
 
 	except Exception as e:

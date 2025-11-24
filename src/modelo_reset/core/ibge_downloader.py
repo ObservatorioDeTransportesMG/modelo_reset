@@ -5,7 +5,7 @@ from typing import Optional
 
 import requests
 
-from utils import constants
+from ..utils import constants
 
 
 def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str] = None) -> Optional[str]:
