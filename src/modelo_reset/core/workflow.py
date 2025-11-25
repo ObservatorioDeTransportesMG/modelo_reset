@@ -114,7 +114,7 @@ class ModeloReset:
 		geom_destino = gpd.points_from_xy(df_od["longitude_destino"], df_od["latitude_destino"])
 		destino_gdf = gpd.GeoDataFrame(df_od, geometry=geom_destino, crs=self.crs_padrao)
 
-		self.camadas["bairros"] = analysis.calcular_fluxos_od(self.camadas["bairros"], origem_gdf, destino_gdf)
+		self.camadas[columns.CAMADA_BAIRRO] = analysis.calcular_fluxos_od(self.camadas[columns.CAMADA_BAIRRO], origem_gdf, destino_gdf)
 
 	def identificar_polos_planejados(self, *polos_planejados: str):
 		"""Define polos planejados e identifica polos emergentes e consolidados.
