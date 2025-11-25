@@ -18,7 +18,6 @@ def ler_shapefile(path: str, target_crs: str, original_crs: str = constants.CRS_
 	"""
 	shapefile = gpd.read_file(path, ignore_geometry=False)
 	if shapefile.crs is None:
-		print(f"Aviso: CRS não definido para {path}. Assumindo {original_crs}.")
 		shapefile = shapefile.set_crs(crs=original_crs, inplace=True)
 
 	shapefile = shapefile.to_crs(target_crs)
@@ -92,6 +91,5 @@ def ler_kml(path: str, target_crs: str) -> gpd.GeoDataFrame:
 		concatenated_gdf = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True), crs=constants.CRS_GEOGRAFICO)
 		return concatenated_gdf.to_crs(target_crs)
 
-	except Exception as e:
-		print(f"Erro ao processar KML: {e}")
+	except Exception:
 		return gpd.GeoDataFrame()

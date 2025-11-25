@@ -16,10 +16,8 @@ def filtrar_setores_por_municipio(setores_gdf: gpd.GeoDataFrame, municipio: str)
 	Returns:
 		gpd.GeoDataFrame: Um novo GeoDataFrame contendo apenas os setores do município e UF especificados.
 	"""
-	print(f"Filtrando setores para {municipio.upper()}...")
 	filtro = setores_gdf[columns.NOME_MUNICIPIO].str.upper() == municipio.upper()
 	setores_filtrados = setores_gdf[filtro].copy()
-	print(f"Encontrados {len(setores_filtrados)} setores.")
 	return setores_filtrados
 
 
@@ -44,7 +42,6 @@ def vincular_setores_com_renda(
 	renda_df[coluna_setor_csv] = renda_df[coluna_setor_csv].astype(str)
 
 	setores_com_renda = setores_filtrados_gdf.merge(renda_df, left_on=coluna_setor_shp, right_on=coluna_setor_csv, how="left")
-	print("Vinculação de setores com renda finalizada.")
 	return setores_com_renda
 
 
@@ -69,7 +66,6 @@ def associar_ibge_bairros(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gdf: 
 			setores_limpos[col_original] = setores_limpos[col_original].str.replace(".", "", regex=False)
 			setores_limpos[col_novo] = pd.to_numeric(setores_limpos[col_original].str.replace(",", ".", regex=False), errors="coerce").fillna(0)
 		else:
-			print(f"Aviso: Coluna '{col_original}' não encontrada no DataFrame de setores.")
 			setores_limpos[col_novo] = 0
 
 	setores_centroids = setores_limpos.copy()
@@ -99,7 +95,6 @@ def agregar_renda_por_bairro(bairros_gdf: gpd.GeoDataFrame, setores_com_renda_gd
 
 	bairros_com_renda = bairros_proj.join(dados_agregados).fillna(0).infer_objects(copy=False)
 
-	print("Agregação de renda por bairro finalizada.")
 	if bairros_gdf.crs is None:
 		raise
 	return bairros_com_renda.to_crs(bairros_gdf.crs)
@@ -140,9 +135,7 @@ def calcular_fluxos_od(bairros_gdf: gpd.GeoDataFrame, origem_gdf: gpd.GeoDataFra
 
 	else:
 		bairros_result[columns.FLUXO] = 0
-		print("Aviso: Colunas 'n_origens' ou 'n_destinos' não encontradas. 'fluxo_total' foi definido como 0.")
 
-	print("Cálculo de fluxos O/D finalizado.")
 	return bairros_result
 
 
@@ -163,7 +156,6 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 	bairros_proj[columns.POPULACAO] = bairros_proj[columns.POPULACAO].astype(int)
 	bairros_proj[columns.DENSIDADE] = bairros_proj[columns.POPULACAO] / bairros_proj[columns.AREA]
 
-	print("Cálculo de densidade finalizado.")
 	if bairros_gdf.crs is None:
 		raise
 	return bairros_proj.to_crs(bairros_gdf.crs)
@@ -201,5 +193,4 @@ def identificar_polos(bairros_gdf: gpd.GeoDataFrame, densidade_limiar=0.6, renda
 		columns.POLO,
 	] = "Emergente"
 
-	print("Identificação de Polos finalizada.")
 	return bairros_result
