@@ -46,7 +46,6 @@ def plotar_polos(gdf_bairros: gpd.GeoDataFrame, crs_projetado: str):
 		crs_projetado (int): Crs projetado.
 	"""
 	if columns.POLO not in gdf_bairros.columns:
-		print("Coluna 'tipo_polo' não encontrada. Execute a análise de polos primeiro.")
 		return
 
 	fig, ax = plt.subplots(1, 1, figsize=(12, 12))
@@ -137,7 +136,6 @@ def plotar_caminhos(
 	gdf_caminhos = gpd.pd.concat([gdf_caminho_ida, gdf_caminho_volta])
 
 	if gdf_caminhos.empty:
-		print("Nenhum caminho para plotar.")
 		ax.legend()
 		plt.show()
 		return

@@ -33,33 +33,24 @@ def _baixar_e_descompactar_zip(url: str, diretorio_saida: str, uf: Optional[str]
 		if os.path.exists(os.path.join(diretorio_saida, constants.CSV_NAME)):
 			return diretorio_saida
 
-		print(f"Baixando de: {url}")
-
 		with requests.get(url, stream=True) as r:
 			r.raise_for_status()
 			with open(nome_arquivo_zip, "wb") as f:
 				for chunk in r.iter_content(chunk_size=8192):
 					f.write(chunk)
 
-		print(f"Arquivo salvo em: {nome_arquivo_zip}")
-
-		print(f"Descompactando {nome_arquivo_zip}...")
 		with zipfile.ZipFile(nome_arquivo_zip, "r") as zip_ref:
 			zip_ref.extractall(diretorio_saida)
 
 		os.remove(nome_arquivo_zip)
-		print("Descompactação concluída e arquivo .zip removido.")
 
 		return diretorio_saida
 
-	except requests.exceptions.RequestException as e:
-		print(f"Erro de conexão ao tentar baixar de {url}: {e}")
+	except requests.exceptions.RequestException:
 		return None
 	except zipfile.BadZipFile:
-		print(f"Erro: O arquivo baixado de {url} não é um .zip válido.")
 		return None
-	except Exception as e:
-		print(f"Ocorreu um erro inesperado: {e}")
+	except Exception:
 		return None
 
 
@@ -82,7 +73,6 @@ def baixar_malha_municipal(diretorio_saida: str, uf: str = "MG", ano: int = 2022
 		for arquivo in Path(diretorio_extraido).rglob("*.shp"):
 			return str(arquivo)
 
-	print(f"Não foi possível encontrar o arquivo .shp para {uf} - {ano}.")
 	return None
 
 
@@ -109,10 +99,4 @@ def baixar_dados_censo_renda(diretorio_saida: str, ano: int = 2022) -> Optional[
 		if primeiro_csv:
 			return str(primeiro_csv)
 
-	print(f"Não foi possível encontrar o arquivo CSV de renda para o Censo {ano}.")
 	return None
-
-
-if __name__ == "__main__":
-	baixar_dados_censo_renda("data/")
-	baixar_malha_municipal("data/malha/")

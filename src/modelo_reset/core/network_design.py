@@ -6,7 +6,6 @@ from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
 from shapely.ops import nearest_points
 
 from ..utils import columns, constants
-from .data_loader import ler_kml
 
 
 def filtrar_vias_por_bairros(gdf_vias: gpd.GeoDataFrame, gdf_bairros: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -67,7 +66,7 @@ def _desconto_polo(distancia: float, raio_influencia: int, max_desconto: float) 
 def criacao_arestas(
 	grafo: nx.MultiDiGraph,
 	linha: LineString,
-	todos_os_pontos_articulacao: MultiPoint,
+	pontos_articulacao: MultiPoint,
 	centroid_bairros: MultiPoint,
 	lista_tipos_bairros: list,
 	via_id_principal: int,
@@ -90,13 +89,13 @@ def criacao_arestas(
 
 		ponto_medio_segmento = segmento.interpolate(0.5, normalized=True)
 
-		dists_pontos_articulacao = [p.distance(ponto_medio_segmento) for p in todos_os_pontos_articulacao.geoms]
+		dists_pontos_articulacao = [p.distance(ponto_medio_segmento) for p in pontos_articulacao.geoms]
 		idx_ponto_articulacao_mais_proximo = dists_pontos_articulacao.index(min(dists_pontos_articulacao))
 		dists_bairro = [p.distance(ponto_medio_segmento) for p in centroid_bairros.geoms]
 		idx_bairro_mais_proximo = dists_bairro.index(min(dists_bairro))
 
 		centroid_mais_proximo = centroid_bairros.geoms[idx_bairro_mais_proximo]
-		ponto_articulacao_mais_proximo = todos_os_pontos_articulacao.geoms[idx_ponto_articulacao_mais_proximo]
+		ponto_articulacao_mais_proximo = pontos_articulacao.geoms[idx_ponto_articulacao_mais_proximo]
 		tipo_bairro_atual = lista_tipos_bairros[idx_bairro_mais_proximo]
 
 		peso_final_segmento = calcular_peso_atrativo(
@@ -128,7 +127,7 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 	if gdf_pontos_articulacao.empty:
 		raise ValueError("O GeoDataFrame de pontos de articulação está vazio.")
 
-	todos_os_pontos_articulacao = MultiPoint(gdf_pontos_articulacao.geometry.union_all())  # type: ignore
+	pontos_articulacao = MultiPoint(gdf_pontos_articulacao.geometry.union_all())  # type: ignore
 	bairros_relevantes = gdf_bairros[gdf_bairros[columns.POLO].isin(["Emergente", "Consolidado"])]
 	centroids_bairros = MultiPoint(bairros_relevantes.centroid.geometry.union_all())  # type: ignore
 	lista_tipos_bairros = bairros_relevantes[columns.POLO].tolist()
@@ -150,9 +149,8 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 			raise ValueError("Erro na direção ou no id da via")
 
 		for linha in geometrias:
-			criacao_arestas(grafo, linha, todos_os_pontos_articulacao, centroids_bairros, lista_tipos_bairros, via_id_principal, direcao)
+			criacao_arestas(grafo, linha, pontos_articulacao, centroids_bairros, lista_tipos_bairros, via_id_principal, direcao)
 
-	print(f"Grafo direcionado criado com {grafo.number_of_nodes()} nós e {grafo.number_of_edges()} arestas.")
 	return grafo
 
 
@@ -171,7 +169,6 @@ def filtrar_sublinhas(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 	Usa uma junção espacial (sjoin) para performance.
 	"""
 	if gdf.empty:
-		print("Geodataframe das linhas vazio.")
 		return gdf
 
 	gdf_com_buffer = gdf.copy()
@@ -185,8 +182,6 @@ def filtrar_sublinhas(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 	gdf_filtrado = gdf.drop(index=indices_das_sublinhas)
 
-	print(f"Linhas originais: {len(gdf)} | Sublinhas removidas: {len(indices_das_sublinhas)} | Linhas finais: {len(gdf_filtrado)}")
-
 	return gdf_filtrado
 
 
@@ -196,14 +191,13 @@ def _obter_ponto_central(gdf_bairros: gpd.GeoDataFrame, nome_bairro_central: Opt
 	"""
 	if nome_bairro_central:
 		nome_limpo = nome_bairro_central.strip()
-		bairro_destino = gdf_bairros[gdf_bairros["name"].str.strip() == nome_limpo]
+		bairro_destino = gdf_bairros[gdf_bairros[columns.NOME_BAIRRO].str.strip() == nome_limpo]
 
 		if bairro_destino.empty:
 			raise ValueError(f"Bairro central '{nome_limpo}' não encontrado.")
 
 		ponto = bairro_destino.geometry.centroid.item()
 	else:
-		print("Nenhum bairro central especificado. Usando o centroide de toda a área de estudo.")
 		area_total = gdf_bairros.geometry.union_all()
 		ponto = area_total.centroid
 
@@ -240,7 +234,6 @@ def encontrar_caminho_minimo(
 	Orquestra o cálculo de rotas entre todos os bairros e um ponto central.
 	"""
 	if grafo.number_of_nodes() == 0:
-		print("Aviso: O grafo está vazio. Nenhum caminho pode ser calculado.")
 		return gpd.GeoDataFrame(crs=constants.CRS_PROJETADO)
 
 	nos_multipoint = MultiPoint([Point(no) for no in grafo.nodes()])
@@ -266,13 +259,13 @@ def encontrar_caminho_minimo(
 		if geometria_rota:
 			gdf_temp = gpd.GeoDataFrame([{"geometry": geometria_rota}], crs=constants.CRS_PROJETADO)
 			intersectados = gpd.sjoin(gdf_temp, gdf_bairros, how="inner", predicate="intersects")
-			nome_coluna = "CD_SETOR" if "CD_SETOR" in intersectados.columns else "name"
-			nomes_bairros = intersectados[nome_coluna].unique()
+			# nome_coluna = "CD_SETOR" if "CD_SETOR" in intersectados.columns else "name"
+			nomes_bairros = intersectados[columns.NOME_BAIRRO].unique()
 
 			lista_caminhos.append({
 				"geometry": geometria_rota,
 				"id": f"{index}{sentido[0]}",
-				"bairro_origem": bairro.name,
+				"bairro_origem": bairro.NM_BAIRRO,
 				"bairros_atendidos_n": len(nomes_bairros),
 				"bairros_lista": ", ".join(nomes_bairros),
 			})
@@ -280,42 +273,8 @@ def encontrar_caminho_minimo(
 			pass
 
 	if not lista_caminhos:
-		print(f"Aviso: Nenhum caminho gerado no sentido {sentido}.")
 		return gpd.GeoDataFrame(crs=constants.CRS_PROJETADO)
 
 	gdf_rotas = gpd.GeoDataFrame(lista_caminhos, crs=constants.CRS_PROJETADO)
 
-	print(f"Filtrando sublinhas para o sentido: {sentido}...")
 	return filtrar_sublinhas(gdf_rotas)
-
-
-if __name__ == "__main__":
-	try:
-		gdf_vias_orig = gpd.read_file("arquivos/Shapes para Mapas/Sistema viario.shp")
-		gdf_bairros_orig = gpd.read_file("arquivos/limites_bairros_moc/limites_bairros_moc.shp")
-		gdf_pontos_articulacao_orig = ler_kml("arquivos/pontos_articulacao.kml", constants.CRS_GEOGRAFICO)
-
-	except Exception as e:
-		print(f"Erro ao ler os arquivos shapefile: {e}")
-		exit()
-
-	print(f"Projetando dados para o CRS métrico: {constants.CRS_PROJETADO}")
-	gdf_vias_proj = gdf_vias_orig.to_crs(constants.CRS_PROJETADO)
-	gdf_bairros_proj = gdf_bairros_orig.to_crs(constants.CRS_PROJETADO)
-	gdf_pontos_articulacao_proj = gdf_pontos_articulacao_orig.to_crs(constants.CRS_PROJETADO)
-	# gdf_bairros_proj = gdf_bairros_proj[gdf_bairros_proj["name"].isin(["Morrinhos", "Centro"])]
-
-	vias_filtradas = gpd.sjoin(gdf_vias_proj, gdf_bairros_proj, how="inner", predicate="intersects")
-	vias_filtradas = vias_filtradas.drop_duplicates(subset="ID")
-
-	print("\nIniciando a criação do grafo...")
-	grafo = criar_grafo_ponderado(vias_filtradas, gdf_pontos_articulacao_proj, gdf_bairros_proj)
-
-	print("\nCalculando os caminhos mínimos...")
-	caminhos_volta = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="VOLTA")
-	caminhos_ida = encontrar_caminho_minimo(gdf_bairros_proj, grafo, sentido="IDA")
-
-	if not caminhos_volta.empty and not caminhos_ida.empty:
-		pass
-	else:
-		print("\nAnálise concluída, mas nenhum caminho foi encontrado para plotar.")
