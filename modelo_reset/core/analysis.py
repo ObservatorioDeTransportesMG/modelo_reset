@@ -153,6 +153,8 @@ def calcular_densidade_populacional(bairros_gdf: gpd.GeoDataFrame, crs_projetado
 
 	bairros_proj[columns.AREA] = bairros_proj.geometry.area / 1_000_000
 
+	bairros_proj = bairros_proj.rename(columns={"renda_total_bairro": columns.RENDA, "populacao_total_bairro": columns.POPULACAO})
+
 	bairros_proj[columns.POPULACAO] = bairros_proj[columns.POPULACAO].astype(int)
 	bairros_proj[columns.DENSIDADE] = bairros_proj[columns.POPULACAO] / bairros_proj[columns.AREA]
 

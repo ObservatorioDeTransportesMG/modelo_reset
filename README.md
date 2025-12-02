@@ -12,39 +12,40 @@ O projeto baseia-se na dissertação de Bruna Oliveira Rosa (COPPE/UFRJ, 2016). 
 
 1. Aquisição Automática de Dados (ibge_downloader.py)
 
-    - Download automático de malhas territoriais (Shapefiles) do servidor FTP do IBGE.
+   - Download automático de malhas territoriais (Shapefiles) do servidor FTP do IBGE.
 
-    - Download e extração de dados de rendimento do Censo Demográfico.
+   - Download e extração de dados de rendimento do Censo Demográfico.
 
 2. Análise Socioeconómica (analysis.py)
 
-    - Identificação de Polos: Classificação automática dos bairros utilizando estatística de quantis (percentis) baseada em:
+   - Identificação de Polos: Classificação automática dos bairros utilizando estatística de quantis (percentis) baseada em:
 
-    - Densidade Populacional.
+   - Densidade Populacional.
 
-    - Rendimento Médio.
+   - Rendimento Médio.
 
-    - Fluxo de Origem/Destino (O/D).
+   - Fluxo de Origem/Destino (O/D).
 
-    - Cruzamento espacial entre setores censitários e bairros locais.
+   - Cruzamento espacial entre setores censitários e bairros locais.
 
 3. Modelação de Rede e Grafos (network_design.py)
 
-    - Conversão da malha viária em MultiDiGraph (NetworkX).
+   - Conversão da malha viária em MultiDiGraph (NetworkX).
 
-    - Peso Atrativo: Diferente de um GPS comum, o algoritmo ajusta o "custo" das arestas (ruas) com base na proximidade de Pontos de Articulação (escolas, hospitais, terminais). Ruas próximas a estes pontos tornam-se "mais baratas" matematicamente, atraindo o traçado da rota.
+   - Peso Atrativo: Diferente de um GPS comum, o algoritmo ajusta o "custo" das arestas (ruas) com base na proximidade de Pontos de Articulação (escolas, hospitais, terminais). Ruas próximas a estes pontos tornam-se "mais baratas" matematicamente, atraindo o traçado da rota.
 
 4. Roteamento (workflow.py)
 
-    - Cálculo de caminhos mínimos (Dijkstra) entre os bairros e o centro/polos.
+   - Cálculo de caminhos mínimos (Dijkstra) entre os bairros e o centro/polos.
 
-    - Gera rotas de IDA e VOLTA.
+   - Gera rotas de IDA e VOLTA.
 
-    - Filtragem de sub-linhas para evitar redundâncias geométricas.
+   - Filtragem de sub-linhas para evitar redundâncias geométricas.
 
 ## 📂 Estrutura do Projeto
 
 O código está modularizado para separar a ingestão de dados, a lógica de negócio e a visualização:
+
 ```
 ├── core/
 │ ├── workflow.py # Orquestrador principal (Classe ModeloReset)
@@ -57,6 +58,7 @@ O código está modularizado para separar a ingestão de dados, a lógica de neg
 ├── arquivos/ # Shapefiles locais (bairros, vias) e KMLs
 └── main.py # Script de execução
 ```
+
 ## 🛠️ Pré-requisitos
 
 O projeto utiliza bibliotecas robustas de geoprocessamento. Recomenda-se utilizar um ambiente virtual (venv ou conda).
@@ -70,8 +72,9 @@ pip install geopandas networkx matplotlib shapely pyogrio requests pandas
 A classe ModeloReset no módulo workflow.py atua como a interface principal.
 
 Exemplo de Execução
+
 ```python
-from core.workflow import ModeloReset
+from modelo_reset import ModeloReset
 
 # 1. Inicializar o modelo
 
@@ -116,6 +119,7 @@ model.plotar_densidade() # Mapa coroplético de densidade
 model.mostrar_rotas_otimizadas() # Plotagem das linhas geradas
 
 ```
+
 ## 📊 Detalhes Metodológicos Implementados
 
 ### Cálculo do Peso Atrativo
@@ -136,6 +140,6 @@ Emergente: Alta densidade + Baixa renda (prioridade social).
 
 Planeado: Definido manualmente (novas urbanizações ou distritos industriais).
 
-#   🤝 Contribuição
+# 🤝 Contribuição
 
 Sinta-se à vontade para abrir issues ou enviar pull requests para melhorar a eficiência dos algoritmos de grafos ou adicionar novos métodos de visualização.

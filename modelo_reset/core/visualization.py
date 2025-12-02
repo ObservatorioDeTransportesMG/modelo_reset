@@ -131,7 +131,7 @@ def plotar_caminhos(
 
 	gdf_vias.plot(ax=ax, color="gray", linewidth=0.5, zorder=1, label="Sistema Viário")
 	gdf_bairros.plot(ax=ax, facecolor="none", edgecolor="red", linestyle="--", zorder=2, label="Limites dos Bairros")
-	gdf_bairros.centroid.plot(ax=ax, color="black", marker="*", markersize=100, zorder=4, label="Centroides")
+	gdf_bairros.centroid.plot(ax=ax, color="black", marker=".", markersize=100, zorder=4, label="Centroides")
 
 	gdf_caminhos = gpd.pd.concat([gdf_caminho_ida, gdf_caminho_volta])
 
@@ -143,7 +143,7 @@ def plotar_caminhos(
 	lista_ids = gdf_caminhos["id"].unique()
 
 	cores = matplotlib.colormaps.get_cmap("hsv")
-	mapa_cores = {linha_id: cores(i) for i, linha_id in enumerate(lista_ids)}
+	mapa_cores = {linha_id: cores(5 * i) for i, linha_id in enumerate(lista_ids)}
 
 	gdf_caminhos["cor"] = gdf_caminhos["id"].map(mapa_cores)
 
@@ -154,8 +154,8 @@ def plotar_caminhos(
 	ax.set_xlabel("Coordenada Leste (metros)")
 	ax.set_ylabel("Coordenada Norte (metros)")
 
-	# ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), borderaxespad=0.0, fontsize="small")
+	ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), borderaxespad=0.0, fontsize="small")
 
-	# plt.tight_layout()
+	plt.tight_layout()
 	plt.grid(True)
 	plt.show()

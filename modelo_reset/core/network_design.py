@@ -128,9 +128,9 @@ def criar_grafo_ponderado(gdf_vias: gpd.GeoDataFrame, gdf_pontos_articulacao: gp
 		raise ValueError("O GeoDataFrame de pontos de articulação está vazio.")
 
 	pontos_articulacao = MultiPoint(gdf_pontos_articulacao.geometry.union_all())  # type: ignore
-	bairros_relevantes = gdf_bairros[gdf_bairros[columns.POLO].isin(["Emergente", "Consolidado"])]
-	centroids_bairros = MultiPoint(bairros_relevantes.centroid.geometry.union_all())  # type: ignore
-	lista_tipos_bairros = bairros_relevantes[columns.POLO].tolist()
+	# bairros_relevantes = gdf_bairros[gdf_bairros[columns.POLO].isin(["Emergente", "Consolidado"])]
+	centroids_bairros = MultiPoint(gdf_bairros.centroid.geometry.union_all())  # type: ignore
+	lista_tipos_bairros = gdf_bairros[columns.POLO].tolist()
 
 	for via in gdf_vias.itertuples():
 		geometrias = []
@@ -245,7 +245,7 @@ def encontrar_caminho_minimo(
 	bairro_central_limpo = bairro_central.strip() if bairro_central else None
 
 	for index, bairro in enumerate(gdf_bairros.itertuples()):
-		if bairro_central_limpo and bairro.name.strip() == bairro_central_limpo:
+		if bairro_central_limpo and bairro.NM_BAIRRO.strip() == bairro_central_limpo:
 			continue
 
 		if bairro.geometry.geom_type not in ("Polygon", "MultiPolygon"):
