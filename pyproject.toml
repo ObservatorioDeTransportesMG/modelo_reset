@@ -1,6 +1,6 @@
 [project]
 name = "modelo-reset"
-version = "0.2.4"
+version = "0.2.6"
 description = "Modelo Reset - Criação da estrutura das linhas de ônibus baseando-se em possíveis polos e micro polos"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,6 +18,15 @@ dependencies = [
     "requests>=2.32.4",
     "shapely>=2.1.1",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["modelo_reset*"]
+namespaces = false
 
 [tool.ruff]
 line-length = 150
