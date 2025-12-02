@@ -10,15 +10,15 @@ NOME_BAIRRO_SHAPEFILE = "name"
 # ORIGEM DESTINO
 ORIGEM = "n_origens"
 DESTINO = "n_destinos"
-FLUXO = "fluxo_total"
+FLUXO = "fluxo"
 
 # DENSIDADE
 AREA = "area_km2"
-POPULACAO = "populacao_total_bairro"
-DENSIDADE = "densidade_km2"
+POPULACAO = "populacao"
+DENSIDADE = "densidade"
 
 # RENDA
-RENDA = "renda_total_bairro"
+RENDA = "renda"
 POLO = "tipo_polo"
 
 # CAMADAS

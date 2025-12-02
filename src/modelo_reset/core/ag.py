@@ -8,11 +8,6 @@ import numpy as np
 from deap import algorithms, base, creator, tools
 from shapely.geometry import LineString, Point
 
-# --- Suas importações e funções existentes (filtrar_vias, criar_grafo, etc...) ---
-# (Assumindo que as funções fornecidas anteriormente estão acessíveis aqui)
-# from seu_modulo import ...
-# from .core.network_design import *
-# from ..network_design import *
 from .network_design import *
 
 
@@ -21,17 +16,15 @@ class OtimizadorRotas:
 		print("Iniciando Otimizador")
 		self.grafo = grafo
 		self.gdf_bairros = gdf_bairros
-		# Mapeia ID/Index do bairro para o Centroid e Nome
 		self.bairros_dict = {idx: {"geom": row.geometry.centroid, "nome": row.NM_BAIRRO} for idx, row in gdf_bairros.iterrows()}
 		self.indices_bairros = list(self.bairros_dict.keys())
 		self.qtd_bairros = len(gdf_bairros)
 
-		# Otimização: Cache de rotas para não rodar Dijkstra/Sjoin repetidamente
 		self.cache_rotas = {}
 		self.nos_grafo_multipoint = None
 
 		self._preparar_grafo()
-		self._pre_calcular_todas_rotas()
+		# self._pre_calcular_todas_rotas()
 
 	def _calcular_rota_individual(
 		self, grafo: nx.MultiDiGraph, no_origem: tuple[float, float], no_destino: tuple[float, float], sentido: str = "IDA"
@@ -79,19 +72,15 @@ class OtimizadorRotas:
 		p1 = self.bairros_dict[idx_origem]["geom"]
 		p2 = self.bairros_dict[idx_destino]["geom"]
 
-		# Encontrar nós mais próximos (usando sua lógica otimizada)
 		no_origem = encontrar_no_mais_proximo(p1, self.nos_grafo_multipoint)
 		no_destino = encontrar_no_mais_proximo(p2, self.nos_grafo_multipoint)
 
-		# Reutilizando sua função interna (adaptada para não precisar de sentido explícito aqui)
 		geom_linha = self._calcular_rota_individual(self.grafo, no_origem, no_destino, "IDA")
 
 		if geom_linha is None:
 			dados = {"dist": float("inf"), "bairros": set(), "geom": None}
 		else:
-			# Calcular intersecções (bairros atendidos)
 			gdf_linha = gpd.GeoDataFrame([{"geometry": geom_linha}], crs=self.gdf_bairros.crs)
-			# Predicate intersects é rápido, mas sjoin ainda tem custo
 			intersecoes = gpd.sjoin(gdf_linha, self.gdf_bairros, how="inner", predicate="intersects")
 			nomes_atendidos = set(intersecoes["NM_BAIRRO"].unique())
 
@@ -100,23 +89,22 @@ class OtimizadorRotas:
 		self.cache_rotas[(idx_origem, idx_destino)] = dados
 		return dados
 
-	def _pre_calcular_todas_rotas(self):
-		"""
-		Gera o cache. ATENÇÃO: Isso pode demorar dependendo do tamanho do grafo. Para testes rápidos, reduza o número de bairros.
-		"""
-		print("Iniciando pré-cálculo de rotas (Isso otimiza o Algoritmo Genético)...")
-		count = 0
-		# Apenas uma heurística: Calcular rotas aleatórias ou todas-contra-todas
-		# Se N_bairros for < 100, pode fazer todas-contra-todas.
-		# Caso contrário, calculamos sob demanda (lazy loading) ou amostramos.
-		# Aqui, vamos deixar para calcular sob demanda dentro do fitness para economizar startup,
-		# mas guardamos em memória (cache) assim que calculado.
-		pass
+	# def _pre_calcular_todas_rotas(self):
+	# 	"""
+	# 	Gera o cache. ATENÇÃO: Isso pode demorar dependendo do tamanho do grafo. Para testes rápidos, reduza o número de bairros.
+	# 	"""
+	# 	print("Iniciando pré-cálculo de rotas (Isso otimiza o Algoritmo Genético)...")
+	# 	count = 0
+	# 	# Apenas uma heurística: Calcular rotas aleatórias ou todas-contra-todas
+	# 	# Se N_bairros for < 100, pode fazer todas-contra-todas.
+	# 	# Caso contrário, calculamos sob demanda (lazy loading) ou amostramos.
+	# 	# Aqui, vamos deixar para calcular sob demanda dentro do fitness para economizar startup,
+	# 	# mas guardamos em memória (cache) assim que calculado.
+	# 	pass
 
 	# --- Configuração do Algoritmo Genético (DEAP) ---
 
 	def setup_ga(self):
-		# 1. Definir Objetivos: Minimizar Distância (-1.0), Maximizar Bairros (+1.0)
 		creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -1.0))
 		creator.create("Individual", list, fitness=creator.FitnessMulti)
 
@@ -135,7 +123,6 @@ class OtimizadorRotas:
 		toolbox.register("individual", gerar_individuo)
 		toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-		# 4. Função de Avaliação (Fitness)
 		def evaluate(individual):
 			total_distancia = 0.0
 			bairros_atendidos = set()
@@ -143,38 +130,28 @@ class OtimizadorRotas:
 			for origem, destino in individual:
 				dados_rota = self._rota_entre_bairros(origem, destino)
 
-				# Penalidade severa para rotas inválidas
 				if dados_rota["dist"] == float("inf"):
 					total_distancia += 100000
 				else:
 					total_distancia += dados_rota["dist"]
 					bairros_atendidos.update(dados_rota["bairros"])
 
-			# Retorna (Minimizar Dist, Maximizar Len(Set))
 			return total_distancia, 1 - (len(bairros_atendidos) / self.qtd_bairros)
-			# return total_distancia, 1 - (len(bairros_atendidos) / self.qtd_bairros)
 
 		toolbox.register("evaluate", evaluate)
 
-		# 5. Operadores Genéticos
-
-		# Crossover: TwoPoint funciona bem com listas
 		toolbox.register("mate", tools.cxTwoPoint)
 
-		# Mutação Customizada: Adicionar, Remover ou Alterar rota respeitando limites
 		def mutacao_variavel(individual):
 			r = random.random()
 
-			# Tenta remover se > 20
 			if r < 0.33 and len(individual) > 20:
 				idx = random.randrange(len(individual))
 				del individual[idx]
 
-			# Tenta adicionar se < 40
 			elif r < 0.66 and len(individual) < 40:
 				individual.append(gerar_gene_rota())
 
-			# Altera uma rota existente
 			else:
 				idx = random.randrange(len(individual))
 				individual[idx] = gerar_gene_rota()
@@ -182,7 +159,7 @@ class OtimizadorRotas:
 			return (individual,)
 
 		toolbox.register("mutate", mutacao_variavel)
-		toolbox.register("select", tools.selNSGA2)  # Seleção Multiobjetivo
+		toolbox.register("select", tools.selNSGA2)
 
 		return toolbox
 
@@ -190,51 +167,68 @@ class OtimizadorRotas:
 		toolbox = self.setup_ga()
 		pop = toolbox.population(n=n_populacao)
 
-		# Estatísticas para acompanhar
 		stats = tools.Statistics(lambda ind: ind.fitness.values)
 		stats.register("avg", np.mean, axis=0)
 		stats.register("min", np.min, axis=0)
 		stats.register("max", np.max, axis=0)
 
-		# Roda o algoritmo
-		# MuPlusLambda é bom para manter elitismo (melhores pais competem com filhos)
 		pop, logbook = algorithms.eaMuPlusLambda(
-			pop,
-			toolbox,
-			mu=n_populacao,
-			lambda_=n_populacao,
-			cxpb=0.4,  # Probabilidade de Cruzamento
-			mutpb=0.5,  # Probabilidade de Mutação
-			ngen=n_geracoes,
-			stats=stats,
-			verbose=True,
+			pop, toolbox, mu=n_populacao, lambda_=n_populacao, cxpb=0.4, mutpb=0.5, ngen=n_geracoes, stats=stats, verbose=True
 		)
 
 		return pop, logbook
 
-	def extrair_melhor_solucao(self, populacao):
-		# Pega as soluções do Fronte de Pareto (melhor trade-off)
+	def extrair_melhor_solucao(self, populacao, criterio="mediana"):
+		"""
+		Extrai uma solução da Fronteira de Pareto.
+
+		Args:
+			populacao: A população final do algoritmo genético.
+			criterio: 'mediana' (equilíbrio), 'custo' (menor distância) ou 'cobertura' (maior abrangência).
+		"""
 		pareto_front = tools.sortNondominated(populacao, len(populacao), first_front_only=True)[0]
 
-		# Escolhe uma solução equilibrada (ex: a que cobre mais bairros dentre as ótimas)
-		# Ou você pode retornar todas para o usuário escolher
-		melhor_ind = min(pareto_front, key=lambda ind: ind.fitness.values[1])
+		if not pareto_front:
+			print("Nenhuma solução encontrada.")
+			return gpd.GeoDataFrame(crs=self.gdf_bairros.crs)
 
-		distancia, abrangencia = melhor_ind.fitness.values
+		if criterio == "custo":
+			melhor_ind = min(pareto_front, key=lambda ind: ind.fitness.values[0])
+			print("Selecionada solução de MÍNIMO CUSTO.")
 
-		print(f"Melhor solucação encontrada: Distancia - {distancia} - Abrangência - {1 - abrangencia}")
+		elif criterio == "cobertura":
+			melhor_ind = max(pareto_front, key=lambda ind: ind.fitness.values[1])
+			print("Selecionada solução de MÁXIMA COBERTURA.")
+
+		else:
+			pareto_ordenado = sorted(pareto_front, key=lambda ind: ind.fitness.values[0])
+
+			indice_meio = len(pareto_ordenado) // 2
+			melhor_ind = pareto_ordenado[indice_meio]
+			print(f"Selecionada solução MEDIANA (Índice {indice_meio} de {len(pareto_ordenado)} na fronteira).")
+
+		distancia_total = melhor_ind.fitness.values[0]
+		abrangencia = melhor_ind.fitness.values[1]
+
+		print(f"Detalhes da Solução: Distância Total: {distancia_total:.2f}m | Abrangência Cobertos: {1 - abrangencia}")
 
 		gdf_final = []
 		for i, (orig, dest) in enumerate(melhor_ind):
 			dados = self._rota_entre_bairros(orig, dest)
-			if dados["geom"]:
+
+			if dados["geom"] and isinstance(dados["geom"], LineString):
 				gdf_final.append({
 					"geometry": dados["geom"],
 					"id": i,
 					"bairros_atendidos": ", ".join(dados["bairros"]),
 					"qtd_bairros": len(dados["bairros"]),
 					"distancia": dados["dist"],
+					"origem_idx": orig,
+					"destino_idx": dest,
 				})
+
+		if not gdf_final:
+			return gpd.GeoDataFrame(crs=self.gdf_bairros.crs)
 
 		return gpd.GeoDataFrame(gdf_final, crs=self.gdf_bairros.crs)
 
@@ -243,29 +237,21 @@ def plotar_fronteira_pareto(populacao):
 	"""
 	Plota a dispersão de todas as soluções e destaca a Fronteira de Pareto.
 	"""
-	# Extrai os valores de fitness de todos os indivíduos
-	# fitness_values = [(distancia, cobertura), ...]
 	fitness_values = [ind.fitness.values for ind in populacao]
 
-	# Separa em listas para o eixo X e Y
 	distancias = [val[0] for val in fitness_values]
 	coberturas = [val[1] for val in fitness_values]
 
-	# Identifica quais indivíduos fazem parte da fronteira de Pareto (rank 0)
-	# O DEAP já possui essa função pronta
 	pareto_front = tools.sortNondominated(populacao, len(populacao), first_front_only=True)[0]
 
 	pareto_fitness = [ind.fitness.values for ind in pareto_front]
 	pareto_dist = [val[0] for val in pareto_fitness]
 	pareto_cov = [val[1] for val in pareto_fitness]
 
-	# --- Plotagem ---
 	plt.figure(figsize=(10, 6))
 
-	# 1. Plota todas as soluções (em cinza)
 	plt.scatter(distancias, coberturas, c="gray", alpha=0.5, label="Soluções Dominadas")
 
-	# 2. Plota a fronteira de Pareto (em vermelho e maiores)
 	plt.scatter(pareto_dist, pareto_cov, c="red", s=50, label="Fronteira de Pareto (Ótimos)")
 
 	plt.title("Fronteira de Pareto: Distância vs Cobertura")
@@ -274,14 +260,11 @@ def plotar_fronteira_pareto(populacao):
 	plt.grid(True, linestyle="--", alpha=0.7)
 	plt.legend()
 
-	# Inverte o eixo Y se quiser ver o "topo" gráfico ou formata percentual
-	# Mas como fitness[1] é float 0.0-1.0:
 	plt.ylim(0, 1.05)  # Garante que mostre até 100%
 
 	plt.show()
 
 
-# --- BÔNUS: Plotar a Evolução (Convergência) ---
 def plotar_evolucao(logbook):
 	"""
 	Plota como a média da população evoluiu ao longo das gerações.
@@ -289,7 +272,6 @@ def plotar_evolucao(logbook):
 	gen = logbook.select("gen")
 	fit_avgs = logbook.select("avg")
 
-	# fit_avgs é uma lista de tuplas [(avg_dist, avg_cov), ...]
 	avg_dist = [fit[0] for fit in fit_avgs]
 	avg_cov = [fit[1] for fit in fit_avgs]
 

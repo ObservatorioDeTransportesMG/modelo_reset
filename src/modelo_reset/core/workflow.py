@@ -172,16 +172,7 @@ class ModeloReset:
 		for polo in args:
 			bairros.loc[bairros[columns.NOME_BAIRRO].isin([polo]), columns.POLO] = "Planejado"
 
-	def gerar_rotas_otimizadas(self, bairro_central: Optional[str] = None):
-		"""
-		Orquestra todo o processo de análise de rede.
-
-		1. Projeta as camadas.
-		2. Filtra as vias.
-		3. Gera o grafo ponderado.
-		4. Calcula os caminhos de ida e volta.
-		"""
-		# 1. Garantir que as camadas estão prontas e projetadas
+	def _montar_grafo(self):
 		camadas_necessarias = ["bairros", "vias", "pontos_articulacao"]
 		if not all(k in self.camadas for k in camadas_necessarias):
 			raise ValueError("Camadas 'bairros', 'vias' e 'pontos_articulacao' são necessárias. Carregue-as primeiro.")
@@ -192,12 +183,24 @@ class ModeloReset:
 		vias_proj = self.camadas[columns.CAMADA_VIAS]
 		pontos_art_proj = self.camadas[columns.CAMADA_PONTOS_ARTICULACO]
 
-		# 2. Filtrar vias da área de estudo
 		vias_filtradas = network_design.filtrar_vias_por_bairros(vias_proj, bairros_proj)
 		self.camadas[columns.CAMADA_VIAS_FILTRADA] = vias_filtradas
 
-		# 3. Gerar o grafo
 		self.grafo = network_design.criar_grafo_ponderado(vias_filtradas, pontos_art_proj, bairros_proj)
+
+	def gerar_rotas_otimizadas(self, bairro_central: Optional[str] = None):
+		"""
+		Orquestra todo o processo de análise de rede.
+
+		1. Projeta as camadas.
+		2. Filtra as vias.
+		3. Gera o grafo ponderado.
+		4. Calcula os caminhos de ida e volta.
+		"""
+		# 1. Garantir que as camadas estão prontas e projetadas
+
+		self._montar_grafo()
+		bairros_proj = self.camadas[columns.CAMADA_BAIRRO]
 
 		if not self.grafo:
 			raise Exception("Falha ao criar o grafo.")
@@ -293,4 +296,6 @@ class ModeloReset:
 		if gdf_bairros is None or columns.NOME_BAIRRO not in gdf_bairros.columns:
 			return []
 
-		return list(gdf_bairros[columns.NOME_BAIRRO])
+		gdf_filtrado = gdf_bairros[gdf_bairros[columns.NOME_BAIRRO].notnull()]
+		gdf_filtrado[columns.NOME_BAIRRO] = gdf_bairros[columns.NOME_BAIRRO].astype(str)
+		return sorted(gdf_filtrado[columns.NOME_BAIRRO].unique())
